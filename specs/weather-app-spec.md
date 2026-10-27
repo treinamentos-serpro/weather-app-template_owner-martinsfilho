@@ -49,60 +49,80 @@ As histórias usam as personas registradas no [discovery](discovery.md#personas)
 
 ## Acceptance Criteria
 
-Os cenários de sucesso pressupõem respostas válidas e completas do provedor. Falhas e respostas incompletas são tratadas separadamente. A verificação pode usar dados controlados, sem depender de condições meteorológicas reais. Critérios condicionados a Open Questions não autorizam escolher silenciosamente uma regra na implementação.
+Cada linha abaixo representa um cenário Given/When/Then: precondições, ação ou evento e resultados observáveis. Todos os resultados da mesma linha devem ser verificados. Os exemplos usam relógio, respostas e ordem de conclusão controlados, sem depender do clima real ou de uma API externa disponível. Cada conjunto meteorológico deve ser associado à cidade correspondente no cenário.
+
+Datas, temperaturas, cidades e horários dos exemplos são dados de teste, não novas decisões de produto. Os rótulos citados como indicação de estado descrevem seu significado; não exigem um texto literal, salvo unidades e valores explícitos.
+
+**Dependências para automação:** AC-03.1 e AC-03.3 verificam a janela de datas com uma data de referência fixada no teste; a política real de fuso de AC-03.2 ainda depende de OQ-05. AC-06.4 depende do timeout de OQ-08. AC-07.3 só é aplicável se cache for aprovado em OQ-08. Esses cenários condicionados não devem ser considerados aprovados por usar parâmetros arbitrários nos testes. Conteúdo meteorológico adicional e arredondamento continuam pendentes em OQ-04 a OQ-06; os exemplos inteiros de conversão abaixo não escolhem uma precisão decimal.
 
 ### US-01 / RF-01 — Busca e seleção
 
-- **AC-01.1:** Dada uma busca por nome de cidade que retorne resultados, quando a busca terminar com sucesso, então a interface deve apresentar os locais retornados para seleção, com seus nomes.
-- **AC-01.2:** Dados dois resultados com o mesmo nome e regiões ou países diferentes, quando forem exibidos, então região e país disponíveis devem permitir distingui-los antes da seleção.
-- **AC-01.3:** Dado um resultado selecionado, quando os dados meteorológicos forem apresentados, então a localização identificada e os dados devem corresponder ao resultado escolhido, não apenas ao texto digitado.
-- **AC-01.4:** Dado um campo vazio ou contendo apenas espaços, quando houver tentativa de pesquisa, então nenhuma cidade deve ser selecionada nem uma consulta meteorológica iniciada com essa entrada.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-01.1 | Nenhuma cidade está selecionada e uma busca por Campinas tem resposta controlada com Campinas, São Paulo, Brasil. | O usuário pesquisa Campinas e a busca termina com sucesso. | O resultado exibe Campinas, São Paulo e Brasil e está disponível para seleção; os dados meteorológicos desse resultado não são apresentados antes da seleção. |
+| AC-01.2 | A resposta da busca contém duas cidades chamadas Santa Maria: uma no Rio Grande do Sul, Brasil, e outra na Califórnia, Estados Unidos. | A busca termina com sucesso. | Dois resultados selecionáveis são apresentados, cada um com Santa Maria, sua respectiva região e seu país. |
+| AC-01.3 | Os dois resultados de AC-01.2 estão disponíveis e têm respostas meteorológicas distintas: 20 °C para a cidade brasileira e 10 °C para a cidade dos Estados Unidos. | O usuário seleciona Santa Maria, Califórnia, Estados Unidos, e a consulta termina com sucesso. | A localização selecionada é identificada como a cidade dos Estados Unidos e sua temperatura é 10 °C; os 20 °C da outra cidade não são apresentados como dados da seleção. |
+| AC-01.4 | Nenhuma cidade está selecionada e o campo de busca está vazio ou contém apenas espaços; cada entrada é verificada separadamente. | O usuário tenta iniciar a pesquisa. | Nenhuma cidade é selecionada, nenhuma consulta meteorológica é iniciada e nenhum resultado meteorológico é apresentado para essa entrada. |
 
 ### US-02 / RF-02 — Clima atual
 
-- **AC-02.1:** Dada uma resposta completa para a cidade selecionada, quando o clima atual for exibido, então devem estar visíveis o nome da cidade, a temperatura com unidade e a descrição da condição em pt-BR.
-- **AC-02.2:** Dados valores meteorológicos controlados, quando exibidos, então devem corresponder à resposta da cidade selecionada, respeitando a unidade ativa; dados de previsão diária não devem ser rotulados como condições atuais.
-- **AC-02.3:** Dado um campo ausente ou inválido, quando o restante dos dados puder ser apresentado, então o campo não deve ser substituído por zero ou por um valor inventado; a indisponibilidade deve ser identificável. O conjunto mínimo para sucesso parcial depende de OQ-04.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-02.1 | Campinas está selecionada, Celsius está ativo e a resposta contém temperatura atual de 20 °C e condição de céu limpo. | A consulta termina com sucesso. | O clima atual exibe Campinas, 20 °C e uma descrição de céu limpo em pt-BR. |
+| AC-02.2 | A cidade selecionada tem temperatura atual de 0 °C, e as temperaturas da previsão são diferentes de zero. | A consulta termina com sucesso em Celsius; o cenário também é executado com temperatura atual de -5 °C. | A área de clima atual exibe respectivamente 0 °C e -5 °C, sem substituir esses valores por temperaturas da previsão ou por indicação de dado ausente. |
+| AC-02.3 | A resposta não contém uma temperatura atual válida: o campo está ausente, nulo ou contém um valor não numérico; cada caso é verificado separadamente. | A resposta é processada para a cidade selecionada. | A indisponibilidade da temperatura atual é indicada e nenhum número substituto é apresentado como temperatura atual. A apresentação de outros campos ou de erro do conjunto depende da política de sucesso parcial de OQ-04. |
 
 ### US-03 / RF-03 — Cinco dias
 
-- **AC-03.1:** Dada uma resposta completa, quando a previsão for apresentada, então o período deve conter exatamente cinco datas distintas, consecutivas e em ordem crescente: hoje, hoje + 1, hoje + 2, hoje + 3 e hoje + 4.
-- **AC-03.2:** Dada a data de referência determinada pelo fuso a aprovar em OQ-05, quando a previsão for exibida, então sua primeira data deve corresponder a hoje nesse fuso, inclusive quando a data no dispositivo do usuário for diferente.
-- **AC-03.3:** Dada uma resposta sem dados para uma das cinco datas, quando a previsão for exibida, então a indisponibilidade nessa data deve ser indicada, sem substituí-la por um sexto dia nem duplicar dados de outra data.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-03.1 | A data de referência controlada é 27/10/2026 e há dados completos para hoje e os quatro dias seguintes. | A previsão da cidade selecionada é apresentada. | O período contém exatamente as datas 27/10/2026, 28/10/2026, 29/10/2026, 30/10/2026 e 31/10/2026, nessa ordem, sem datas duplicadas e identificado como previsão, não como clima atual. |
+| AC-03.2 | O fuso de referência foi aprovado em OQ-05 e, no instante controlado do teste, nele é 27/10/2026, enquanto no dispositivo é 28/10/2026. | A previsão é apresentada. | A primeira data é 27/10/2026 e a última é 31/10/2026, seguindo o fuso aprovado, não a data do dispositivo. |
+| AC-03.3 | A data de referência é 27/10/2026 e a resposta contém dados distintos para 27, 28, 30 e 31/10 e 01/11/2026, mas nenhum dado para 29/10/2026. | A previsão é apresentada. | A janela continua de 27 a 31/10/2026; 29/10 indica indisponibilidade, as outras quatro datas mantêm seus próprios dados e 01/11 não é incluído para preencher a lacuna. |
 
 A lista de campos e a granularidade da previsão terão critérios adicionais após OQ-05; esta especificação não presume mínimas, máximas, precipitação ou intervalos horários como decisões aprovadas.
 
 ### US-04 / RF-04 — Unidades
 
-- **AC-04.1:** Dada uma primeira visita sem preferência aplicável, quando temperaturas forem exibidas, então a unidade inicial deve ser Celsius, identificada por °C.
-- **AC-04.2:** Dadas temperaturas em Celsius, quando Fahrenheit for selecionado, então todas as temperaturas visíveis do clima atual e da previsão devem passar a °F. Um valor de 0 °C deve corresponder a 32 °F, e 20 °C a 68 °F.
-- **AC-04.3:** Dada a alternância de unidade, quando concluída, então cidade selecionada, datas e valores não relacionados à temperatura devem permanecer inalterados.
-- **AC-04.4:** Dado o mesmo conjunto de dados, quando a unidade mudar de Celsius para Fahrenheit e voltar a Celsius, então os valores originais devem ser recuperados conforme a regra de arredondamento a aprovar em OQ-06, sem erro acumulado por alternâncias sucessivas.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-04.1 | É a primeira visita, não há preferência aplicável e os dados da cidade selecionada estão disponíveis. | As temperaturas são apresentadas sem interação com o seletor de unidade. | Celsius está selecionado e todas as temperaturas visíveis são identificadas por °C. |
+| AC-04.2 | O clima atual e a previsão estão visíveis em Celsius e as temperaturas de teste são 0 °C e 20 °C, distribuídas entre os conjuntos. | O usuário seleciona Fahrenheit. | Todas as temperaturas visíveis passam a °F, com 0 °C representado por 32 °F e 20 °C por 68 °F; nenhuma temperatura desses conjuntos permanece em °C. |
+| AC-04.3 | A cidade, as datas, as condições e os valores não relacionados à temperatura estão registrados antes da troca. | O usuário alterna de Celsius para Fahrenheit. | Cidade selecionada, datas, condições e valores não relacionados à temperatura são iguais aos registrados antes da troca. |
+| AC-04.4 | O mesmo conjunto de dados contém 0 °C, 20 °C e -5 °C, sem receber nova atualização meteorológica. | O usuário alterna de Celsius para Fahrenheit e volta a Celsius, repetindo esse ciclo dez vezes. | Após cada retorno, os valores exibidos são 0 °C, 20 °C e -5 °C nos mesmos campos, sem variação entre os ciclos. Casos com casas decimais serão complementados após OQ-06. |
 
 ### US-05 / RF-05 — Estados da consulta
 
-- **AC-05.1:** Dada a abertura sem cidade selecionada, então a interface deve disponibilizar a busca sem exibir um erro de consulta nem dados de uma cidade não escolhida.
-- **AC-05.2:** Dada uma busca ou consulta meteorológica em andamento, então deve existir uma indicação perceptível de carregamento; ao terminar, ela deve ser substituída pelo resultado, estado vazio ou erro correspondente.
-- **AC-05.3:** Dada uma busca concluída com zero resultados, então a interface deve comunicar que nenhuma cidade foi encontrada e permitir editar o termo e pesquisar novamente, sem apresentar o caso como falha de conexão.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-05.1 | A aplicação é aberta sem cidade selecionada e nenhuma consulta foi iniciada. | A tela inicial termina de carregar. | A busca está disponível, não há indicador de consulta em andamento, erro de consulta nem dados meteorológicos de uma cidade não escolhida. |
+| AC-05.2 | Uma busca ou consulta meteorológica foi iniciada e sua resposta está retida pelo teste. | A operação permanece pendente e depois recebe um desfecho controlado: sucesso, vazio ou erro, verificados separadamente quando aplicáveis. | Enquanto pendente, a operação tem indicação de carregamento; após o desfecho, essa indicação desaparece e o resultado, estado vazio ou erro correspondente é exibido. |
+| AC-05.3 | Uma busca tem resposta de sucesso com zero resultados. | A busca termina e o usuário edita o termo e inicia outra busca com resultado válido. | Primeiro é exibida a indicação de nenhuma cidade encontrada, sem mensagem de falha de conexão; depois, o estado vazio é substituído pelos resultados da nova busca. |
 
 ### US-06 / RF-06 — Falhas e recuperação
 
-- **AC-06.1:** Dada uma falha de conexão ou do provedor, quando a operação terminar em erro, então a interface deve apresentar uma mensagem compreensível em pt-BR, sem expor detalhes técnicos internos como mensagem principal.
-- **AC-06.2:** Dada uma operação que falhou, quando o usuário solicitar nova tentativa e o provedor responder com sucesso, então o erro deve ser substituído pelo resultado correspondente, sem exigir recarregamento da página.
-- **AC-06.3:** Dadas as seleções sucessivas das cidades A e B, quando a resposta de A chegar depois da de B, então ela não deve substituir os dados apresentados para B.
-- **AC-06.4:** Dado o limite de espera a aprovar em OQ-08, quando ele for excedido sem conclusão, então o carregamento deve terminar com mensagem de falha e possibilidade de nova tentativa, em vez de permanecer indefinidamente.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-06.1 | Uma busca ou consulta meteorológica está pendente. | Ela termina com falha de rede ou erro do provedor, incluindo limite de requisições; cada falha é verificada separadamente. | O carregamento termina, uma mensagem em pt-BR informa que não foi possível concluir a operação e há uma ação para tentar novamente; stack trace e resposta técnica bruta não são usados como mensagem principal. |
+| AC-06.2 | Uma operação falhou e sua ação de nova tentativa está disponível. | O usuário solicita nova tentativa e a mesma busca ou consulta recebe resposta válida. | O resultado correspondente é exibido, a mensagem de erro e o carregamento desaparecem e a página não é recarregada. |
+| AC-06.3 | A consulta de Campinas foi iniciada, depois o usuário selecionou Curitiba, e Curitiba já apresenta sua resposta controlada de 10 °C. | A resposta atrasada de Campinas chega com 20 °C. | Curitiba permanece selecionada com 10 °C e os dados apresentados para Curitiba não são substituídos pelos de Campinas. |
+| AC-06.4 | O limite de espera T foi aprovado em OQ-08 e uma operação não recebe resposta. | O relógio controlado avança até o processamento da expiração de T. | O indicador de carregamento termina e são exibidos uma mensagem de falha e uma ação de nova tentativa; a operação não continua no estado de carregamento. |
 
 ### US-07 / RF-07 — Referência temporal
 
-- **AC-07.1:** Dado um conjunto meteorológico exibido, então seu horário ou período de referência deve ser visível e associado ao conjunto correspondente, com indicação do fuso usado.
-- **AC-07.2:** Dado um horário de referência fornecido pelo provedor, então ele não deve ser substituído pelo horário de acesso e apresentado como se fosse uma nova atualização meteorológica.
-- **AC-07.3:** Se o uso de cache for aprovado e dados em cache forem exibidos, então a interface deve identificá-los como dados armazenados e mostrar o horário da última atualização conhecida. Este critério não exige implementar cache.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-07.1 | A resposta de clima atual tem referência em 27/10/2026 às 09:00 UTC e a previsão tem período de 27 a 31/10/2026, com fuso UTC informado nos dados controlados. | Ambos os conjuntos são apresentados. | O clima atual tem sua referência temporal visível, a previsão tem seu período visível e cada referência é associada ao conjunto correspondente, com indicação do fuso da apresentação. Se houver conversão de fuso, o instante e as datas continuam correspondendo aos dados de origem. |
+| AC-07.2 | A referência meteorológica é 27/10/2026 às 09:00 UTC e a consulta é concluída às 09:10 UTC. | O clima atual é apresentado com seu horário de referência. | A referência corresponde a 09:00 UTC, ou ao mesmo instante no fuso de apresentação, e não a 09:10 UTC; eventual horário de consulta é identificado separadamente, sem ser apresentado como atualização meteorológica. |
+| AC-07.3 | A política de cache foi aprovada em OQ-08 e autoriza exibir um conjunto armazenado cuja última atualização conhecida é 27/10/2026 às 09:00 UTC. | Esse conjunto é apresentado sem nova atualização do provedor. | Uma indicação de dados armazenados está associada ao conjunto e sua última atualização conhecida corresponde a 09:00 UTC, com o fuso informado, sem atribuir a ele o horário de acesso como nova atualização. |
 
 ### US-08 / RF-08 — Acesso e idioma
 
-- **AC-08.1:** Dado um usuário sem conta, então buscar, selecionar cidade, consultar dados e alternar unidades deve ser possível sem cadastro ou autenticação.
-- **AC-08.2:** Dados os estados inicial, carregando, sucesso, vazio e erro, então os textos e nomes acessíveis próprios da aplicação devem estar em pt-BR. Nomes próprios de localidades não precisam ser traduzidos.
-- **AC-08.3:** Dadas datas e horários exibidos, então sua apresentação deve seguir convenções de pt-BR, sem alterar a data ou o fuso de referência dos dados.
+| Critério | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-08.1 | O usuário não possui conta nem sessão autenticada e as respostas das consultas são válidas. | Ele abre a aplicação, pesquisa, seleciona uma cidade, consulta o clima atual e a previsão e alterna para Fahrenheit. | A jornada é concluída sem solicitar cadastro, login, credenciais ou API key. |
+| AC-08.2 | O teste possui um catálogo de textos e nomes acessíveis aprovados em pt-BR, e respostas controladas para cada estado. | Os estados inicial, carregando, sucesso, vazio e erro são apresentados, um por vez. | Os textos e nomes acessíveis próprios da aplicação correspondem ao catálogo pt-BR, incluindo condições meteorológicas; nomes próprios de localidades não são obrigados a ser traduzidos. |
+| AC-08.3 | Os dados exibidos representam 27/10/2026 às 09:05 no fuso de apresentação informado. | A interface apresenta a data e o horário em formato numérico. | A data é apresentada como 27/10/2026 e o horário como 09:05, com indicação do fuso associado; a formatação não muda a data nem o instante representado. |
 
 ## Non-Functional Requirements
 

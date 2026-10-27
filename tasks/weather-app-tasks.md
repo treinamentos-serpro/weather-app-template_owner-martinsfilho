@@ -120,11 +120,11 @@
 ### T-16 — Normalizar os cinco dias locais
 - **Tipo:** Data
 - **Descrição:** acrescentar ao adaptador diário a montagem da janela da spec.
-- **Rastreabilidade:** RF-03; AC-03.1 a AC-03.6.
+- **Rastreabilidade:** RF-03; AC-03.1 a AC-03.7.
 - **Dependências:** T-15.
 - **Arquivos prováveis:** src/services/forecast.ts.
-- **Critérios de aceite:** cinco datas locais ordenadas; arrays associados pelo índice original; dias faltantes mantidos como lacuna; extras ignorados. Duplicata invalida o dia, mínima maior que máxima invalida o par e fuso inválido produz falha global.
-- **Verificação:** entrada fora de ordem, arrays curtos, duplicatas e dia extra produzem os resultados de AC-03.3/AC-03.4, sem misturar snapshots.
+- **Critérios de aceite:** cinco datas locais ordenadas; arrays de mínima, máxima, código e probabilidade associados pela mesma data/índice; dias faltantes mantidos como lacuna; extras ignorados. Probabilidade null/ausente vira 0%; duplicata invalida o dia, mínima maior que máxima invalida o par e fuso inválido produz falha global.
+- **Verificação:** entrada fora de ordem, arrays curtos incluindo probabilidade, duplicatas e dia extra produzem os resultados de AC-03.3/AC-03.4/AC-03.7, sem deslocar campos entre datas.
 
 ### T-17 — Consultar e classificar o snapshot meteorológico
 - **Tipo:** Data
@@ -132,7 +132,7 @@
 - **Rastreabilidade:** RF-02, RF-03, RF-05, RF-07; AC-05.5, AC-05.6; RNF-09.
 - **Dependências:** T-16.
 - **Arquivos prováveis:** src/services/forecast.ts.
-- **Critérios de aceite:** request único com current/daily/timezone/forecast_days do plano e Celsius; retornar completo somente com todos os campos exigidos, parcial com ao menos uma temperatura utilizável, erro sem nenhuma. consultedAt é a conclusão da consulta; respostas inválidas não geram sucesso vazio.
+- **Critérios de aceite:** request único inclui precipitation_probability_max com current/daily/timezone/forecast_days do plano e Celsius; mapear probabilidade diária null/ausente para 0%. Retornar completo somente com todos os campos exigidos, parcial com ao menos uma temperatura utilizável, erro sem nenhuma. consultedAt é a conclusão da consulta; respostas inválidas não geram sucesso vazio.
 - **Verificação:** conferir URL e três classificações com payloads controlados, incluindo apenas atual e apenas diário utilizáveis.
 
 ## Entrega 4 — Hooks e Estado
@@ -208,7 +208,7 @@
 - **Rastreabilidade:** RF-03, RF-04; AC-03.1, AC-03.3, AC-04.2, AC-04.3.
 - **Dependências:** T-06, T-07, T-08, T-21, T-25.
 - **Arquivos prováveis:** src/components/ForecastDay.tsx; src/components/Forecast.tsx.
-- **Critérios de aceite:** cinco datas com mínima/máxima/condição, incluindo lacunas, sem sexto dia ou repetição; key estável pela data, não índice. Rótulos de mínima/máxima e unidade são identificáveis sem depender de cor.
+- **Critérios de aceite:** cinco datas com mínima/máxima/condição e probabilidade máxima de precipitação, incluindo lacunas, sem sexto dia ou repetição; null da fonte aparece como 0%. Key estável pela data, não índice. Rótulos de mínima/máxima/probabilidade e unidade são identificáveis sem depender de cor.
 - **Verificação:** montar props com 27 a 31/10/2026 e ausência em 29/10; conferir data, valores e conteúdo indisponível.
 
 ### T-32 — Apresentar estados, atualização e referências
@@ -308,10 +308,10 @@
 ### T-19 — Testar janela diária e resultado do forecast
 - **Tipo:** Test
 - **Descrição:** testar o service de forecast com mock de fetch, verificando request, janela diária e classificação do snapshot inteiro.
-- **Rastreabilidade:** RF-03, RF-05; AC-03.1 a AC-03.6, AC-05.5, AC-05.6.
+- **Rastreabilidade:** RF-03, RF-05; AC-03.1 a AC-03.7, AC-05.5, AC-05.6.
 - **Dependências:** T-03, T-17.
 - **Arquivos prováveis:** tests/unit/services/forecast.test.ts.
-- **Critérios de aceite:** verificar parâmetros, datas locais/DST, arrays desalinhados, duplicatas, pares invertidos e lacunas; testar completo, parcial e erro global. Cada resultado esperado é independente da disponibilidade real da API.
+- **Critérios de aceite:** verificar parâmetros incluindo precipitation_probability_max, datas locais/DST, arrays desalinhados, null de probabilidade normalizado para 0%, duplicatas, pares invertidos e lacunas; testar completo, parcial e erro global. Cada resultado esperado é independente da disponibilidade real da API.
 - **Verificação:** executar o arquivo no Vitest com mock de fetch e relógio controlado; verificar URL/parâmetros, restaurar mocks entre casos e impedir acesso ao provedor real.
 
 ### T-22 — Testar o hook de busca
@@ -353,10 +353,10 @@
 ### T-34 — Testar componentes meteorológicos
 - **Tipo:** Test
 - **Descrição:** verificar conteúdo atual e diário sem hooks nem rede.
-- **Rastreabilidade:** RF-02, RF-03, RF-04; AC-02.1 a AC-02.4, AC-03.1, AC-03.3, AC-04.2, AC-04.3.
+- **Rastreabilidade:** RF-02, RF-03, RF-04; AC-02.1 a AC-02.4, AC-03.1, AC-03.3, AC-03.7, AC-04.2, AC-04.3.
 - **Dependências:** T-03, T-30, T-31.
 - **Arquivos prováveis:** tests/unit/components/CurrentWeather.test.tsx; tests/unit/components/Forecast.test.tsx.
-- **Critérios de aceite:** dados completos, zero/negativos, lacunas, código desconhecido e duas unidades têm as saídas da spec; cinco datas permanecem após rerender, sem valores inventados.
+- **Critérios de aceite:** dados completos, zero/negativos, lacunas, probabilidade nula convertida para 0%, código desconhecido e duas unidades têm as saídas da spec; cinco datas permanecem após rerender, sem valores inventados.
 - **Verificação:** testes de props e rerender com conteúdo literal esperado, sem snapshots extensos de HTML.
 
 ### T-35 — Testar status e seletor
@@ -392,7 +392,7 @@
 - **Rastreabilidade:** RF-01, RF-02, RF-03, RF-04, RF-08; AC-01.1, AC-01.2, AC-01.3, AC-02.1, AC-03.1, AC-04.1 a AC-04.6, AC-08.1, AC-08.6; RNF-01, RNF-10.
 - **Dependências:** T-39.
 - **Arquivos prováveis:** tests/e2e/weather.spec.ts.
-- **Critérios de aceite:** interceptar ambos os hosts com fixtures; executar a jornada nos projetos desktop e mobile, incluindo viewport mobile de 375 × 812 CSS px com toque. Selecionar o destino homônimo correto, conferir 20,0 °C atuais e cinco datas com valores/referências previstos; alternar para 68,0 °F sem nova chamada a nenhum endpoint nem mudança de cidade/datas. Cobrir troca durante loading e recarga sem restauração; nenhuma conta é solicitada e atribuição visível. Controles necessários ficam visíveis e operáveis no mobile; a inspeção abrangente de layout permanece em T-42.
+- **Critérios de aceite:** interceptar ambos os hosts com fixtures; executar a jornada nos projetos desktop e mobile, incluindo viewport mobile de 375 × 812 CSS px com toque. Selecionar o destino homônimo correto, conferir 20,0 °C atuais e cinco datas com valores, probabilidades e referências previstos; null de probabilidade aparece como 0%. Alternar para 68,0 °F sem nova chamada a nenhum endpoint nem mudança de cidade/datas. Cobrir troca durante loading e recarga sem restauração; nenhuma conta é solicitada e atribuição visível. Controles necessários ficam visíveis e operáveis no mobile; a inspeção abrangente de layout permanece em T-42.
 - **Verificação:** pnpm test:e2e -- tests/e2e/weather.spec.ts executa em todos os projetos configurados; conferir relatório de desktop e mobile, contagem de chamadas e resultados por role/nome acessível, sem acesso à API real ou sleep fixo.
 
 ### T-41 — Testar falhas e concorrência E2E
@@ -511,7 +511,7 @@
 - **Rastreabilidade:** RF-01 a RF-08; RNF-01 a RNF-11.
 - **Dependências:** T-38, T-40, T-41, T-42, T-43, T-44, T-45, T-46, T-47, T-48, T-49, T-50, T-52.
 - **Arquivos prováveis:** tasks/weather-app-tasks.md; plans/weather-app-plan.md.
-- **Critérios de aceite:** cada um dos 51 AC tem teste/evidência referenciado e resultado; pnpm lint/build/test/test:e2e têm código zero. Cada RNF e OQ tem evidência ou bloqueio declarado; incorporar o relatório mensal de T-52, ou a revisão formal do requisito antes de considerá-lo atendido. A revisão não autoriza lançamento enquanto gates da spec não forem atendidos ou formalmente revisados.
+- **Critérios de aceite:** cada um dos 52 AC tem teste/evidência referenciado e resultado; pnpm lint/build/test/test:e2e têm código zero. Cada RNF e OQ tem evidência ou bloqueio declarado; incorporar o relatório mensal de T-52, ou a revisão formal do requisito antes de considerá-lo atendido. A revisão não autoriza lançamento enquanto gates da spec não forem atendidos ou formalmente revisados.
 - **Verificação:** conferir matriz, relatórios, comandos e bloqueios; tarefas não executadas não podem ser marcadas concluídas.
 
 ## Prioridade e Tamanho
@@ -689,7 +689,7 @@ Associação não significa execução. Tarefas UI/Data implementam recortes; ta
 | --- | --- | --- |
 | US-01 / RF-01 | AC-01.1 a AC-01.8 | T-09, T-14, T-22, T-29, T-40. |
 | US-02 / RF-02 | AC-02.1 a AC-02.5 | T-18, T-34, T-40. |
-| US-03 / RF-03 | AC-03.1 a AC-03.6 | T-10, T-19, T-34, T-40. |
+| US-03 / RF-03 | AC-03.1 a AC-03.7 | T-10, T-19, T-34, T-40. |
 | US-04 / RF-04 | AC-04.1 a AC-04.6 | T-53, T-34, T-35, T-38, T-40. |
 | US-05 / RF-05 | AC-05.1 a AC-05.6 | T-19, T-22, T-26, T-29, T-35, T-41. |
 | US-06 / RF-06 | AC-06.1 a AC-06.8 | T-12, T-22, T-26, T-27, T-41. |

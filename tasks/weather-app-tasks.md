@@ -503,6 +503,23 @@
 - **Critérios de aceite:** cada um dos 51 AC tem teste/evidência referenciado e resultado; pnpm lint/build/test/test:e2e têm código zero. Cada RNF e OQ tem evidência ou bloqueio declarado; incorporar o relatório mensal de T-52, ou a revisão formal do requisito antes de considerá-lo atendido. A revisão não autoriza lançamento enquanto gates da spec não forem atendidos ou formalmente revisados.
 - **Verificação:** conferir matriz, relatórios, comandos e bloqueios; tarefas não executadas não podem ser marcadas concluídas.
 
+## Matriz RF → Tarefas
+
+Tarefas **Implementação** criam comportamento; **Verificação** comprova critérios e não substitui implementação. T-04 define contratos compartilhados. T-01 a T-03 são pré-requisitos gerais, omitidos das linhas para manter o foco funcional.
+
+| Requisito funcional | Tarefas de implementação | Tarefas de verificação | Lacuna |
+| --- | --- | --- | --- |
+| RF-01 — Buscar e selecionar cidades | T-05 valida entrada; T-13 adapta geocoding; T-20/T-21 orquestram busca; T-28 apresenta resultados; T-36 conecta seleção à jornada. | T-09, T-14, T-22, T-29, T-40. | Nenhuma identificada. |
+| RF-02 — Exibir clima atual | T-08 traduz condições; T-15 normaliza dados atuais; T-17 fornece consulta; T-23/T-24 guardam e atualizam estado; T-30/T-32 apresentam clima e referência; T-36 integra. | T-10, T-18, T-26, T-34, T-35, T-38, T-40. | Nenhuma identificada. |
+| RF-03 — Previsão de hoje e quatro dias | T-07 trata datas/fusos; T-08 traduz condições; T-16 normaliza os cinco dias; T-17 consulta; T-23/T-25 mantêm e atualizam estado; T-31/T-32 apresentam previsão/período; T-36 integra. | T-10, T-19, T-26, T-27, T-34, T-38, T-40. | Nenhuma identificada. |
+| RF-04 — Alternar Celsius/Fahrenheit | T-06 converte/formata; T-30/T-31 derivam a apresentação; T-33 controla seleção; T-36 mantém Unit e evita novo request. | T-53, T-34, T-35, T-38, T-40. | Nenhuma identificada. |
+| RF-05 — Estados inicial, loading, sucesso, vazio e erro | T-20/T-21 modelam estados da busca; T-23/T-24 modelam resultado meteorológico; T-28/T-32 apresentam estados; T-36 compõe a jornada. | T-22, T-26, T-29, T-35, T-38, T-41. | Nenhuma identificada. |
+| RF-06 — Falhas, timeout e concorrência | T-11 classifica transporte; T-21/T-24 protegem operações concorrentes; T-25 suspende atualização automática após falha; T-32 apresenta retry/bloqueio; T-36 integra. | T-12, T-22, T-26, T-27, T-35, T-38, T-41. | Nenhuma identificada. |
+| RF-07 — Referências temporais e atualização | T-07 formata datas/fusos; T-15/T-17 produzem referências e consultedAt; T-25 agenda atualização; T-32 apresenta horários/ação Atualizar; T-36 integra. | T-10, T-18, T-19, T-26, T-27, T-35, T-38, T-41. | Nenhuma identificada. |
+| RF-08 — pt-BR, sem conta, acessível e com atribuição | T-08 fornece catálogo; T-28/T-30/T-31/T-32/T-33 apresentam textos e controles; T-32 apresenta atribuição; T-36 oferece jornada sem conta; T-37 aplica estilos/foco. | T-10, T-29, T-35, T-38, T-40, T-44, T-45. | Nenhuma identificada; auditoria manual continua sendo gate, não implementação. |
+
+**Resultado da análise:** todos os RF-01 a RF-08 têm pelo menos uma tarefa de implementação, distinta das tarefas de teste. A matriz indica cobertura planejada, não tarefas concluídas; a auditoria de acessibilidade/navegadores e outras evidências de release permanecem sujeitas aos critérios dos RNFs e às aprovações pendentes.
+
 ## Matriz de Cobertura Planejada
 
 Associação não significa execução. Tarefas UI/Data implementam recortes; tarefas Test comprovam os critérios completos. RNF-01, RNF-03, RNF-08, RNF-10 e RNF-11 também se aplicam transversalmente conforme a spec.

@@ -6,6 +6,14 @@ const numberFormatter = new Intl.NumberFormat('pt-BR', {
   useGrouping: false,
 });
 
+export function convertTemperature(temperatureC: number, unit: Unit): number {
+  return unit === 'fahrenheit' ? (temperatureC * 9) / 5 + 32 : temperatureC;
+}
+
+export function unitLabel(unit: Unit): string {
+  return unit === 'fahrenheit' ? '°F' : '°C';
+}
+
 function roundToOneDecimal(value: number): number {
   const magnitude = Math.abs(value);
   const roundedMagnitude = Math.round(
@@ -21,8 +29,7 @@ export function formatTemperature(temperatureC: number | null, unit: Unit): stri
     return 'Indisponível';
   }
 
-  const convertedValue = unit === 'fahrenheit' ? (temperatureC * 9) / 5 + 32 : temperatureC;
-  const unitLabel = unit === 'fahrenheit' ? '°F' : '°C';
+  const convertedValue = convertTemperature(temperatureC, unit);
 
-  return `${numberFormatter.format(roundToOneDecimal(convertedValue))} ${unitLabel}`;
+  return `${numberFormatter.format(roundToOneDecimal(convertedValue))} ${unitLabel(unit)}`;
 }

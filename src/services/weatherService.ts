@@ -14,17 +14,47 @@ export class WeatherServiceError extends Error {
   }
 }
 
-async function fetchWithTimeout(url: string): Promise<Response> {
+interface TimedFetchResult {
+  response: Response;
+  payload: unknown;
+}
+
+async function fetchWithTimeout(url: string): Promise<TimedFetchResult> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    return await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, { signal: controller.signal });
+
+    if (!response.ok) {
+      return { response, payload: undefined };
+    }
+
+    let payload: unknown;
+
+    try {
+      payload = await response.json();
+    } catch (error) {
+      const errorName =
+        typeof error === 'object' && error !== null && 'name' in error ? error.name : null;
+
+      if (controller.signal.aborted || errorName === 'AbortError') {
+        throw new WeatherServiceError('A requisição demorou demais.');
+      }
+
+      throw new WeatherServiceError('A resposta da API não contém JSON válido.');
+    }
+
+    return { response, payload };
   } catch (error) {
+    if (error instanceof WeatherServiceError) {
+      throw error;
+    }
+
     const errorName =
       typeof error === 'object' && error !== null && 'name' in error ? error.name : null;
 
-    if (errorName === 'AbortError') {
+    if (controller.signal.aborted || errorName === 'AbortError') {
       throw new WeatherServiceError('A requisição demorou demais.');
     }
 
@@ -246,21 +276,13 @@ export async function searchCities(name: string): Promise<City[]> {
   }
 
   const url = `${GEOCODING_URL}?name=${encodeURIComponent(trimmedName)}&count=10&language=pt&format=json`;
-  const response = await fetchWithTimeout(url);
+  const { response, payload } = await fetchWithTimeout(url);
 
   if (!response.ok) {
     throw new WeatherServiceError(
       `Falha ao buscar cidades (HTTP ${response.status}).`,
       response.status,
     );
-  }
-
-  let payload: unknown;
-
-  try {
-    payload = await response.json();
-  } catch {
-    throw new WeatherServiceError('A resposta de geocoding não contém JSON válido.');
   }
 
   if (!isRecord(payload)) {
@@ -302,21 +324,13 @@ export async function getWeather(city: City): Promise<WeatherData> {
     forecast_days: '5',
     timeformat: 'iso8601',
   });
-  const response = await fetchWithTimeout(`${FORECAST_URL}?${params.toString()}`);
+  const { response, payload } = await fetchWithTimeout(`${FORECAST_URL}?${params.toString()}`);
 
   if (!response.ok) {
     throw new WeatherServiceError(
       `Falha ao consultar a previsão (HTTP ${response.status}).`,
       response.status,
     );
-  }
-
-  let payload: unknown;
-
-  try {
-    payload = await response.json();
-  } catch {
-    throw new WeatherServiceError('A resposta de forecast não contém JSON válido.');
   }
 
   if (!isRecord(payload) || !isRecord(payload.current) || !isRecord(payload.daily)) {

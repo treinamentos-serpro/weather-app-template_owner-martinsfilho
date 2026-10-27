@@ -2,6 +2,7 @@ import type { City, CurrentWeather, ForecastDay, WeatherData } from '../types/we
 
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
+const REQUEST_TIMEOUT_MS = 10_000;
 
 export class WeatherServiceError extends Error {
   constructor(
@@ -10,6 +11,26 @@ export class WeatherServiceError extends Error {
   ) {
     super(message);
     this.name = 'WeatherServiceError';
+  }
+}
+
+async function fetchWithTimeout(url: string): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } catch (error) {
+    const errorName =
+      typeof error === 'object' && error !== null && 'name' in error ? error.name : null;
+
+    if (errorName === 'AbortError') {
+      throw new WeatherServiceError('A requisição demorou demais.');
+    }
+
+    throw new WeatherServiceError('Falha de rede.');
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -225,7 +246,7 @@ export async function searchCities(name: string): Promise<City[]> {
   }
 
   const url = `${GEOCODING_URL}?name=${encodeURIComponent(trimmedName)}&count=10&language=pt&format=json`;
-  const response = await fetch(url);
+  const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
     throw new WeatherServiceError(
@@ -281,7 +302,7 @@ export async function getWeather(city: City): Promise<WeatherData> {
     forecast_days: '5',
     timeformat: 'iso8601',
   });
-  const response = await fetch(`${FORECAST_URL}?${params.toString()}`);
+  const response = await fetchWithTimeout(`${FORECAST_URL}?${params.toString()}`);
 
   if (!response.ok) {
     throw new WeatherServiceError(

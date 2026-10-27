@@ -7,7 +7,7 @@
 - SPA React estática por HTTPS, consumindo Open-Meteo diretamente. Componentes → hooks → services; hooks e services usam funções puras de lib e modelos de types. Nenhuma camada inferior importa componentes.
 - Sem backend, roteador, store global, service worker, autenticação ou cache de recuperação. Preservar tema dark glassmorphism do projeto.
 - Componentes apresentam props e emitem eventos; hooks controlam efeitos; services transportam e adaptam dados; lib concentra regras determinísticas. DTOs externos não são modelos da UI.
-- [Backlog](../tasks/weather-app-tasks.md): aprovações e contratos → fundações → serviços e UI independentes → integração → evidências de qualidade e operação. Não implementar src/tests antes dos artefatos SDD correspondentes.
+- [Backlog](../tasks/weather-app-tasks.md): aprovações e setup → tipos → funções puras → services → hooks → componentes → integração → testes → hardening e operação. IDs são estáveis; seguir a ordem e as dependências do backlog. A criação das suítes completas ocorre na etapa Testes, sem dispensar validação focada durante a implementação. Não implementar src/tests antes dos artefatos SDD correspondentes.
 
 ## Tech Stack
 

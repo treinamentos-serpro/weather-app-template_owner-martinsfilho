@@ -8,7 +8,7 @@ A empresa precisa de uma aplicação de previsão do tempo para que usuários co
 
 - **RF-01 — Buscar cidades:** permitir que o usuário pesquise uma cidade e selecione o local desejado para consultar o clima.
 - **RF-02 — Exibir clima atual:** apresentar as condições atuais para a cidade selecionada.
-- **RF-03 — Exibir previsão:** apresentar a previsão do tempo para os cinco dias seguintes à consulta.
+- **RF-03 — Exibir previsão:** apresentar a previsão do tempo para hoje e os quatro dias seguintes.
 - **RF-04 — Alternar unidade de temperatura:** permitir alternar entre Celsius (°C) e Fahrenheit (°F), atualizando as temperaturas exibidas.
 
 ## Requisitos Não-Funcionais
@@ -29,7 +29,17 @@ A empresa precisa de uma aplicação de previsão do tempo para que usuários co
 - **R-04 — Plataforma e compatibilidade pouco especificadas:** não há definição de navegadores, tamanhos de tela ou se a experiência deve ser um site responsivo, um PWA ou um aplicativo nativo.
 - **R-05 — Expectativas de atualização indefinidas:** sem uma frequência acordada, usuários podem interpretar dados válidos como desatualizados ou esperar atualizações em tempo real.
 
+## Decisões
+
+- **D-01 — Fonte de dados: Open-Meteo, sem API key.** **Justificativa:** simplificar a integração de geocoding e previsão, sem gerenciamento de credenciais. **Resolve:** a escolha da fonte em **Provedor de dados**; permanecem pendentes a validação de cobertura, licença, atribuição, custo, limites de requisição e suporte.
+- **D-02 — Previsão de cinco dias: hoje + quatro dias.** **Justificativa:** definir uma janela única de consulta que inclua o dia atual. **Resolve:** a inclusão de hoje e a quantidade de dias em **Período da previsão**; permanecem pendentes o fuso horário de referência e, em **Detalhe da previsão**, a granularidade e as variáveis exibidas.
+- **D-03 — Unidade padrão: Celsius (°C).** **Justificativa:** oferecer uma apresentação inicial consistente, mantendo a alternância para Fahrenheit prevista no RF-04. **Resolve:** a unidade inicial em **Unidades e preferências**; permanecem pendentes o alcance da troca de unidade e a persistência local da preferência.
+- **D-04 — Sem autenticação e sem persistência de servidor.** **Justificativa:** reduzir a complexidade do escopo inicial, dispensando contas e armazenamento de dados da aplicação no servidor. **Resolve:** a inclusão de contas em **Escopo adjacente**, que ficam fora do escopo, e a persistência de servidor em **Privacidade e telemetria**, que não será adotada. Persistência local, coleta de dados e telemetria ainda precisam de definição; esta decisão não implica ausência de registros pelo provedor externo.
+- **D-05 — Idioma da UI: pt-BR.** **Justificativa:** manter textos, controles e mensagens da interface consistentes em português brasileiro. **Resolve:** o idioma da interface em **Telas, navegadores e idiomas**; permanecem pendentes as telas e os navegadores suportados, além da cobertura geográfica e dos idiomas aceitos na busca em **Cobertura geográfica e busca**.
+
 ## Perguntas em Aberto
+
+As perguntas abaixo registram os pontos levantados no discovery. Nos itens parcialmente resolvidos, considerar como pendentes apenas os aspectos não definidos na seção **Decisões**.
 
 - **Público e sucesso:** quem são os usuários-alvo e quais métricas definirão o sucesso do produto? **Impacto:** sem público e resultados esperados, não é possível priorizar a experiência nem avaliar se o lançamento atende ao objetivo.
 - **Plataforma:** o produto será um site responsivo, um PWA ou também terá aplicativos nativos? Quais sistemas operacionais são necessários? **Impacto:** a resposta muda arquitetura, custo, cronograma e critérios de aceite.
@@ -52,7 +62,7 @@ A empresa precisa de uma aplicação de previsão do tempo para que usuários co
 
 - O escopo inicial é uma aplicação voltada a usuários finais, acessível em navegador e utilizável em dispositivos móveis.
 - Uma pesquisa deve resultar na seleção de uma cidade específica antes da exibição dos dados.
-- A previsão de cinco dias se refere aos cinco dias seguintes, sem incluir necessariamente o dia atual como um dia completo.
+- A previsão de cinco dias inclui hoje e os quatro dias seguintes, conforme a decisão D-02; o fuso horário de referência ainda precisa ser definido.
 - Celsius e Fahrenheit são unidades de apresentação; a troca não altera a localização nem o período consultado.
 - Não há, neste briefing, exigência de contas de usuário, alertas, geolocalização automática ou dados meteorológicos históricos; esses itens ficam fora do escopo inicial até confirmação.
 - As metas numéricas e os padrões sugeridos nos requisitos não funcionais são referências para discussão, não compromissos aprovados; precisam de validação com as partes interessadas.

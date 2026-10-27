@@ -240,14 +240,23 @@
 
 ## Entrega 7 — Testes
 
-### T-09 — Testar busca e conversão puras
+### T-09 — Testar a validação pura da busca
 - **Tipo:** Test
-- **Descrição:** automatizar os limites de entrada e de apresentação de temperatura.
-- **Rastreabilidade:** RF-01, RF-04; AC-01.4, AC-01.5, AC-04.2, AC-04.3, AC-04.4.
-- **Dependências:** T-03, T-05, T-06, T-36.
-- **Arquivos prováveis:** tests/unit/lib/search.test.ts; tests/unit/lib/temperature.test.ts.
-- **Critérios de aceite:** cobrir todas as variantes de T-05/T-06, caracteres Unicode fora do BMP e zero negativo; dez alternâncias preservam os originais. Cada cenário declara entrada e saída literal esperada.
-- **Verificação:** pnpm test -- tests/unit/lib/search.test.ts tests/unit/lib/temperature.test.ts passa sem rede.
+- **Descrição:** automatizar somente a validação e a preservação dos termos de pesquisa.
+- **Rastreabilidade:** RF-01; AC-01.4, AC-01.5.
+- **Dependências:** T-03, T-05, T-36.
+- **Arquivos prováveis:** tests/unit/lib/search.test.ts.
+- **Critérios de aceite:** cobrir vazio, espaços, 1/2/100/101 pontos de código, símbolos sem letras e caracteres Unicode fora do BMP; preservar acentos, hífens, apóstrofos e espaços internos. Cada cenário declara entrada e saída literal esperada; a conversão é verificada separadamente em T-53.
+- **Verificação:** pnpm test -- tests/unit/lib/search.test.ts passa sem rede.
+
+### T-53 — Testar a conversão de unidade isoladamente
+- **Tipo:** Test
+- **Descrição:** dedicar uma suíte Vitest à conversão e formatação dos valores Celsius originais, sem montar componentes.
+- **Rastreabilidade:** RF-04; AC-04.2, AC-04.3, AC-04.4; BR-10.
+- **Dependências:** T-03, T-06, T-36.
+- **Arquivos prováveis:** tests/unit/lib/temperature.test.ts.
+- **Critérios de aceite:** 0 e 20 °C aparecem como 32,0 e 68,0 °F; 1,25 e -1,25 °C aparecem como 1,3 e -1,3 °C e, em Fahrenheit, 34,3 e 29,8 °F. -0,01 °C aparece como 0,0 °C e 32,0 °F; null permanece Indisponível sem unidade. Dez alternâncias preservam os valores originais; nenhuma chamada de fetch ocorre em qualquer caso.
+- **Verificação:** pnpm test -- tests/unit/lib/temperature.test.ts com saídas literais, spy de fetch e restauração dos mocks entre casos.
 
 ### T-10 — Testar calendário e códigos
 - **Tipo:** Test
@@ -265,7 +274,7 @@
 - **Dependências:** T-03, T-11, T-36.
 - **Arquivos prováveis:** tests/unit/services/http.test.ts.
 - **Critérios de aceite:** variantes de rede, HTTP 500, JSON inválido, 429, Retry-After em segundos/data/inacessível e expiração durante leitura têm resultados distintos previstos. Abort por substituição não vira timeout nem erro visível; timers ficam limpos.
-- **Verificação:** Vitest com fake timers e mock restaurado entre testes; zero acesso à rede real.
+- **Verificação:** Vitest com fake timers e mock de fetch restaurado entre testes; chamadas inesperadas falham o teste e nenhum acesso à rede real é permitido.
 
 ### T-14 — Testar o adaptador de geocoding
 - **Tipo:** Test
@@ -274,25 +283,25 @@
 - **Dependências:** T-03, T-13, T-36.
 - **Arquivos prováveis:** tests/unit/services/geocoding.test.ts.
 - **Critérios de aceite:** inspecionar parâmetros decodificados e resultados; validar extremos de coordenadas, números inválidos, nome ausente e chave estável. Uma entrada com marcação permanece texto, sem alterar host, parâmetros de controle ou documento.
-- **Verificação:** teste focado com mock de fetch cobre cada variante isoladamente.
+- **Verificação:** teste focado com mock de fetch cobre cada variante isoladamente, verifica URL/parâmetros e restaura o mock após cada caso; nenhuma chamada real é permitida.
 
 ### T-18 — Testar normalização atual e validade
 - **Tipo:** Test
-- **Descrição:** automatizar o contrato temporal e os campos das condições atuais.
+- **Descrição:** testar o service de forecast com mock de fetch, focando o contrato temporal e os campos das condições atuais.
 - **Rastreabilidade:** RF-02, RF-07; AC-02.1 a AC-02.5, AC-07.1, AC-07.2.
 - **Dependências:** T-03, T-17, T-36.
 - **Arquivos prováveis:** tests/unit/services/forecastCurrent.test.ts.
 - **Critérios de aceite:** cobrir instante local sem offset segundo T-02, referência ausente/inconsistente, zero, negativos, código desconhecido e todas as fronteiras de AC-02.5; previsão válida sobrevive à invalidade atual.
-- **Verificação:** teste focado com relógio fixo e fixtures representativas do contrato validado.
+- **Verificação:** teste focado com mock de fetch, relógio fixo e fixtures representativas do contrato validado; restaurar mocks e impedir chamadas reais ao provedor.
 
 ### T-19 — Testar janela diária e resultado do forecast
 - **Tipo:** Test
-- **Descrição:** automatizar a consulta e a classificação do snapshot inteiro.
+- **Descrição:** testar o service de forecast com mock de fetch, verificando request, janela diária e classificação do snapshot inteiro.
 - **Rastreabilidade:** RF-03, RF-05; AC-03.1 a AC-03.6, AC-05.5, AC-05.6.
 - **Dependências:** T-03, T-17, T-36.
 - **Arquivos prováveis:** tests/unit/services/forecast.test.ts.
 - **Critérios de aceite:** verificar parâmetros, datas locais/DST, arrays desalinhados, duplicatas, pares invertidos e lacunas; testar completo, parcial e erro global. Cada resultado esperado é independente da disponibilidade real da API.
-- **Verificação:** executar o arquivo no Vitest com fetch e relógio controlados.
+- **Verificação:** executar o arquivo no Vitest com mock de fetch e relógio controlado; verificar URL/parâmetros, restaurar mocks entre casos e impedir acesso ao provedor real.
 
 ### T-22 — Testar o hook de busca
 - **Tipo:** Test
@@ -321,14 +330,14 @@
 - **Critérios de aceite:** testar 15 min, página oculta, retorno, virada local antes de 15 min, gatilhos simultâneos e suspensão após erro; nenhum fetch ao simples vencer do cooldown. Indicação de consulta desatualizada deriva de consultedAt quando ainda houver snapshot visível com mais de 15 min.
 - **Verificação:** fake timers e visibilitychange, sem esperas reais ou sleep fixo.
 
-### T-29 — Testar formulário e seleção
+### T-29 — Testar estados e seleção do componente de busca
 - **Tipo:** Test
-- **Descrição:** verificar interação e acessibilidade da busca isolada.
+- **Descrição:** verificar loading, erro, vazio e sucesso do componente de busca isolado por props, além de seleção e acessibilidade.
 - **Rastreabilidade:** RF-01, RF-05, RF-08; AC-01.1, AC-01.2, AC-01.4, AC-01.5, AC-01.6, AC-05.2, AC-05.3, AC-08.4, AC-08.5.
 - **Dependências:** T-03, T-28, T-36.
 - **Arquivos prováveis:** tests/unit/components/CitySearch.test.tsx.
-- **Critérios de aceite:** queries por role/label verificam os nomes, regiões, países, mensagem vazia e erro associado; Enter e clique disparam uma ação cada; teclado alcança e seleciona resultado sem armadilha de foco.
-- **Verificação:** Testing Library e user-event, sem depender de classes Tailwind.
+- **Critérios de aceite:** casos separados por props verificam loading com Buscando cidades e sem lista antiga; erro com mensagem do catálogo e ação de retry emitindo uma vez; vazio com Nenhuma cidade encontrada, sem mensagem de falha; sucesso com nomes/regiões/países e seleção correta. Validação é associada ao campo; Enter e clique disparam uma ação cada e teclado seleciona sem armadilha de foco. O componente não chama fetch.
+- **Verificação:** Vitest com Testing Library, user-event, queries por role/nome acessível e callbacks espiados; rerender entre estados confirma remoção de mensagens/listas antigas, sem depender de classes Tailwind.
 
 ### T-34 — Testar componentes meteorológicos
 - **Tipo:** Test
@@ -345,14 +354,14 @@
 - **Rastreabilidade:** RF-04 a RF-08; AC-04.1, AC-05.4, AC-05.5, AC-05.6, AC-06.6, AC-07.1, AC-07.2, AC-07.4, AC-08.2, AC-08.3, AC-08.5, AC-08.6.
 - **Dependências:** T-03, T-32, T-33, T-36.
 - **Arquivos prováveis:** tests/unit/components/WeatherStatus.test.tsx; tests/unit/components/TemperatureToggle.test.tsx.
-- **Critérios de aceite:** callbacks e seleção programática corretos, retry bloqueado sem chamar ação, rótulos temporais distintos e link de atribuição correto. Mensagem de erro não contém stack trace ou resposta bruta.
+- **Critérios de aceite:** casos separados verificam loading com Consultando previsão e sem números antigos; erro com mensagem do catálogo e retry; sucesso parcial com aviso e campos indisponíveis; sucesso completo sem aviso parcial. Callbacks e seleção programática corretos, retry bloqueado sem chamar ação, rótulos temporais distintos e link de atribuição correto; erro não expõe stack trace/resposta bruta. Vazio de busca pertence a T-29; ausência total de temperaturas é erro, não empty meteorológico.
 - **Verificação:** Testing Library com consultas acessíveis e contagem de callbacks.
 
 ### T-38 — Testar a composição da jornada
 - **Tipo:** Test
 - **Descrição:** verificar a integração React e fechar os gates de bootstrap.
 - **Rastreabilidade:** RF-01 a RF-08; AC-01.3, AC-04.1 a AC-04.6, AC-05.1, AC-07.3, AC-08.1.
-- **Dependências:** T-03, T-09, T-10, T-12, T-14, T-18, T-19, T-22, T-26, T-27, T-29, T-34, T-35, T-36.
+- **Dependências:** T-03, T-09, T-53, T-10, T-12, T-14, T-18, T-19, T-22, T-26, T-27, T-29, T-34, T-35, T-36.
 - **Arquivos prováveis:** tests/unit/App.test.tsx.
 - **Critérios de aceite:** seleção, carregamento, sucesso, parcial, erro, retry e toggle refletem o estado correto; unidade não gera request e inicia em Celsius em nova montagem. pnpm lint, pnpm build e pnpm test terminam com código zero; registrar falhas sem suprimir testes.
 - **Verificação:** executar teste focado e os três gates, mantendo evidência de comandos e resultados.
@@ -366,14 +375,14 @@
 - **Critérios de aceite:** Chromium, Firefox, WebKit e projeto mobile executáveis; reaproveitar servidor/baseURL existentes e preservar traces/screenshots de falha. Nenhum teste E2E é descoberto pelo Vitest.
 - **Verificação:** listagem de projetos/testes e execução de sondagem temporária nos quatro projetos, removida após validação.
 
-### T-40 — Testar a jornada E2E de sucesso
+### T-40 — Testar o fluxo principal E2E em desktop e mobile
 - **Tipo:** Test
-- **Descrição:** exercitar busca, seleção, previsão e unidade em navegador.
-- **Rastreabilidade:** RF-01, RF-02, RF-03, RF-04, RF-08; AC-01.1, AC-01.2, AC-01.3, AC-02.1, AC-03.1, AC-04.1 a AC-04.6, AC-08.1, AC-08.6.
+- **Descrição:** dedicar uma suíte Playwright ao fluxo busca → seleção → clima atual → cinco dias → troca de unidade, em desktop e viewport mobile.
+- **Rastreabilidade:** RF-01, RF-02, RF-03, RF-04, RF-08; AC-01.1, AC-01.2, AC-01.3, AC-02.1, AC-03.1, AC-04.1 a AC-04.6, AC-08.1, AC-08.6; RNF-01, RNF-10.
 - **Dependências:** T-39.
 - **Arquivos prováveis:** tests/e2e/weather.spec.ts.
-- **Critérios de aceite:** interceptar ambos os hosts; destino homônimo correto mostra valores esperados; cinco dias e referências visíveis; toggle mantém dados sem novo request; recarga remove preferência/cidade e jornada não pede conta. Executar também no projeto mobile.
-- **Verificação:** pnpm test:e2e -- tests/e2e/weather.spec.ts passa sem depender da API real.
+- **Critérios de aceite:** interceptar ambos os hosts com fixtures; executar a jornada nos projetos desktop e mobile, incluindo viewport mobile de 375 × 812 CSS px com toque. Selecionar o destino homônimo correto, conferir 20,0 °C atuais e cinco datas com valores/referências previstos; alternar para 68,0 °F sem nova chamada a nenhum endpoint nem mudança de cidade/datas. Cobrir troca durante loading e recarga sem restauração; nenhuma conta é solicitada e atribuição visível. Controles necessários ficam visíveis e operáveis no mobile; a inspeção abrangente de layout permanece em T-42.
+- **Verificação:** pnpm test:e2e -- tests/e2e/weather.spec.ts executa em todos os projetos configurados; conferir relatório de desktop e mobile, contagem de chamadas e resultados por role/nome acessível, sem acesso à API real ou sleep fixo.
 
 ### T-41 — Testar falhas e concorrência E2E
 - **Tipo:** Test
@@ -503,7 +512,7 @@ Associação não significa execução. Tarefas UI/Data implementam recortes; ta
 | US-01 / RF-01 | AC-01.1 a AC-01.8 | T-09, T-14, T-22, T-29, T-40. |
 | US-02 / RF-02 | AC-02.1 a AC-02.5 | T-18, T-34, T-40. |
 | US-03 / RF-03 | AC-03.1 a AC-03.6 | T-10, T-19, T-34, T-40. |
-| US-04 / RF-04 | AC-04.1 a AC-04.6 | T-09, T-34, T-35, T-38, T-40. |
+| US-04 / RF-04 | AC-04.1 a AC-04.6 | T-53, T-34, T-35, T-38, T-40. |
 | US-05 / RF-05 | AC-05.1 a AC-05.6 | T-19, T-22, T-26, T-29, T-35, T-41. |
 | US-06 / RF-06 | AC-06.1 a AC-06.8 | T-12, T-22, T-26, T-27, T-41. |
 | US-07 / RF-07 | AC-07.1 a AC-07.6 | T-10, T-18, T-26, T-27, T-35, T-41. |

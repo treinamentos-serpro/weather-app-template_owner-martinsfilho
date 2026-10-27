@@ -1,4 +1,4 @@
-import { formatDayLabel } from '../lib/format';
+import { formatDayLabel, getShortDate } from '../lib/format';
 import { formatTemperature } from '../lib/temperature';
 import { getWeatherPresentation } from '../lib/weatherCodes';
 import type { ForecastDay, Unit } from '../types/weather';
@@ -9,6 +9,7 @@ export interface ForecastCardData extends ForecastDay {
 
 interface ForecastCardProps {
   day: ForecastCardData;
+  dayIndex: number;
   unit: Unit;
 }
 
@@ -26,14 +27,17 @@ function formatProbability(value: number | null | undefined): string {
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(value)}%`;
 }
 
-export default function ForecastCard({ day, unit }: ForecastCardProps) {
+export default function ForecastCard({ day, dayIndex, unit }: ForecastCardProps) {
   const condition = getWeatherPresentation(day.weatherCode);
 
   return (
     <article className="h-full rounded-lg border border-white/10 bg-white/5 p-4 text-white shadow-glass backdrop-blur-md">
-      <h3 className="break-words text-sm font-semibold capitalize text-white">
-        {formatDayLabel(day.date)}
-      </h3>
+      <header>
+        <h3 className="break-words text-sm font-semibold capitalize text-white">
+          {formatDayLabel(day.date, dayIndex)}
+        </h3>
+        <p className="mt-1 text-xs text-white/70">{getShortDate(day.date)}</p>
+      </header>
       <div className="mt-4 text-center">
         <span aria-hidden="true" className="text-4xl leading-none">
           {condition.icon}

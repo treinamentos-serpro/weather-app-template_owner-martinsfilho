@@ -514,17 +514,167 @@
 - **Critérios de aceite:** cada um dos 51 AC tem teste/evidência referenciado e resultado; pnpm lint/build/test/test:e2e têm código zero. Cada RNF e OQ tem evidência ou bloqueio declarado; incorporar o relatório mensal de T-52, ou a revisão formal do requisito antes de considerá-lo atendido. A revisão não autoriza lançamento enquanto gates da spec não forem atendidos ou formalmente revisados.
 - **Verificação:** conferir matriz, relatórios, comandos e bloqueios; tarefas não executadas não podem ser marcadas concluídas.
 
+## Prioridade e Tamanho
+
+P0 = caminho crítico até uma fatia funcional e seus critérios centrais. P1 = hardening/evidências para prontidão; continua obrigatório quando exigido pela spec. P2 = atividade que precisa amadurecer ao longo da operação; não é removida do escopo e continua ligada ao gate de T-51. Tamanho P/M/G representa esforço relativo da tarefa, não quantidade de arquivos; o limite de até dois arquivos prováveis permanece.
+
+| Tarefa | Prioridade | Tamanho |
+| --- | --- | --- |
+| T-01 | P0 | M |
+| T-02 | P0 | G |
+| T-03 | P0 | M |
+| T-04 | P0 | M |
+| T-05 | P0 | P |
+| T-06 | P0 | M |
+| T-07 | P0 | G |
+| T-08 | P0 | M |
+| T-09 | P0 | P |
+| T-10 | P0 | M |
+| T-11 | P0 | G |
+| T-12 | P0 | M |
+| T-13 | P0 | M |
+| T-14 | P0 | M |
+| T-15 | P0 | M |
+| T-16 | P0 | M |
+| T-17 | P0 | M |
+| T-18 | P0 | M |
+| T-19 | P0 | M |
+| T-20 | P0 | M |
+| T-21 | P0 | G |
+| T-22 | P0 | M |
+| T-23 | P0 | M |
+| T-24 | P0 | G |
+| T-25 | P0 | G |
+| T-26 | P0 | M |
+| T-27 | P0 | M |
+| T-28 | P0 | M |
+| T-29 | P0 | M |
+| T-30 | P0 | P |
+| T-31 | P0 | M |
+| T-32 | P0 | M |
+| T-33 | P0 | P |
+| T-34 | P0 | M |
+| T-35 | P0 | M |
+| T-36 | P0 | G |
+| T-37 | P1 | M |
+| T-38 | P0 | M |
+| T-39 | P1 | M |
+| T-40 | P0 | G |
+| T-41 | P0 | G |
+| T-42 | P1 | G |
+| T-43 | P1 | G |
+| T-44 | P0 | M |
+| T-45 | P1 | G |
+| T-46 | P1 | G |
+| T-47 | P1 | G |
+| T-48 | P1 | M |
+| T-49 | P1 | M |
+| T-50 | P0 | G |
+| T-51 | P0 | G |
+| T-52 | P2 | G |
+| T-53 | P0 | P |
+| T-54 | P0 | M |
+
+## Sequência de Fatias Verticais
+
+Executar as IDs abaixo respeitando a ordem da lista e as dependências individuais. Cada fatia termina em resultado demonstrável; validação por fixtures não substitui os gates de release.
+
+| Fatia | Tarefas na sequência | Resultado visível/verificável |
+| --- | --- | --- |
+| 0. Fundamentos aprovados | T-01 → T-02 → T-03 → T-04 → T-05/T-06/T-07/T-08 → T-09/T-10/T-53 | Baseline e contrato externo registrados; tipos e funções puras cobertos por testes focados. |
+| 1. Buscar e selecionar cidade | T-11 → T-13 → T-12/T-14 → T-20 → T-21 → T-22 → T-28 → T-29 → T-54 | Primeira tela executável: pesquisar, distinguir resultados, ver estados loading/erro/vazio/sucesso e selecionar cidade; sem depender do forecast. |
+| 2. Clima atual, previsão e unidade | T-15 → T-16 → T-17 → T-18/T-19 → T-23 → T-24 → T-25 → T-26/T-27 → T-30/T-31/T-32/T-33 → T-34/T-35 → T-36 → T-38 | Jornada completa com clima atual, cinco dias locais, conversão derivada, atualização e estados de recuperação verificados. |
+| 3. E2E da aplicação | T-39 → T-40/T-41/T-44 | Fluxos principal, erro/concorrência e teclado executados em navegador, com APIs interceptadas e viewport mobile. |
+| 4. Hardening e prontidão | T-37 → T-42/T-43 → T-45/T-46/T-47/T-48 → T-49 → T-50 → T-52 → T-51 | Layout, segurança, acessibilidade, desempenho, usabilidade, operação e gates documentados; disponibilidade medida no período exigido antes de fechar prontidão. |
+
+**Primeiro incremento visível:** a fatia 1 publica a busca e seleção antes de concluir a integração meteorológica. T-54 compõe essa primeira experiência; T-36 amplia a mesma aplicação para a jornada completa. P2/T-52 deve começar assim que T-48 e T-49 permitirem, em paralelo com atividades compatíveis, pois a janela mensal não pode ser encurtada por priorização.
+
+## Prioridade e Tamanho
+
+**P0** = caminho crítico até uma fatia funcional e seus critérios centrais. **P1** = hardening/evidências necessárias para prontidão; prioridade menor não torna requisitos da spec opcionais. **P2** = evidência operacional que precisa amadurecer ao longo do tempo; continua necessária para fechar T-51 conforme OQ-10. **P** = esforço pequeno e localizado; **M** = moderado, em até dois arquivos prováveis; **G** = maior complexidade de coordenação, estados ou observação, ainda respeitando o limite de arquivos.
+
+| Tarefa | Prioridade | Tamanho |
+| --- | --- | --- |
+| T-01 | P0 | M |
+| T-02 | P0 | G |
+| T-03 | P0 | M |
+| T-04 | P0 | M |
+| T-05 | P0 | P |
+| T-06 | P0 | M |
+| T-07 | P0 | G |
+| T-08 | P0 | M |
+| T-09 | P0 | P |
+| T-10 | P0 | M |
+| T-11 | P0 | G |
+| T-12 | P0 | M |
+| T-13 | P0 | M |
+| T-14 | P0 | M |
+| T-15 | P0 | M |
+| T-16 | P0 | M |
+| T-17 | P0 | M |
+| T-18 | P0 | M |
+| T-19 | P0 | M |
+| T-20 | P0 | M |
+| T-21 | P0 | G |
+| T-22 | P0 | M |
+| T-23 | P0 | M |
+| T-24 | P0 | G |
+| T-25 | P0 | G |
+| T-26 | P0 | M |
+| T-27 | P0 | M |
+| T-28 | P0 | M |
+| T-29 | P0 | M |
+| T-30 | P0 | P |
+| T-31 | P0 | M |
+| T-32 | P0 | M |
+| T-33 | P0 | P |
+| T-34 | P0 | M |
+| T-35 | P0 | M |
+| T-36 | P0 | G |
+| T-37 | P1 | M |
+| T-38 | P0 | M |
+| T-39 | P0 | M |
+| T-40 | P0 | G |
+| T-41 | P0 | G |
+| T-42 | P1 | G |
+| T-43 | P1 | G |
+| T-44 | P0 | M |
+| T-45 | P1 | G |
+| T-46 | P1 | G |
+| T-47 | P1 | G |
+| T-48 | P1 | M |
+| T-49 | P1 | M |
+| T-50 | P0 | G |
+| T-51 | P0 | G |
+| T-52 | P2 | G |
+| T-53 | P0 | P |
+| T-54 | P0 | M |
+
+## Sequência de Fatias Verticais
+
+As setas indicam dependência sequencial; tarefas entre parênteses podem ocorrer em paralelo quando suas dependências individuais estiverem concluídas. IDs permanecem estáveis. P2 descreve tempo de maturação, não permissão para ignorar o requisito.
+
+| Fatia | Sequência sugerida | Entrega demonstrável |
+| --- | --- | --- |
+| 0. Fundamentos | T-01 → (T-02, T-03) → T-04 → (T-05, T-06, T-07, T-08) → (T-09, T-10, T-53) | Decisões/contrato registrados; tipos e funções puras com testes focados. |
+| 1. Busca visível | T-11 → (T-12, T-13) → (T-14, T-20) → T-21 → (T-22, T-28) → T-29 → T-54 | Aplicação executável para buscar, distinguir, selecionar e exibir uma cidade; vazio/erro acessíveis; nenhum request de forecast ainda. É a primeira entrega visível. |
+| 2. Clima, previsão e unidade | T-15 → T-16 → T-17 → (T-18, T-19, T-23) → T-24 → T-25 → (T-26, T-27, T-30, T-31, T-32, T-33) → (T-34, T-35) → T-36 → T-38 | Jornada completa com clima atual, cinco dias locais, conversão derivada, atualização e estados completos/parciais/erro. |
+| 3. E2E | T-39 → (T-40, T-41, T-44) | Fluxo principal e recuperação testados em desktop/mobile com APIs interceptadas. |
+| 4. Hardening | T-37 → (T-42, T-43, T-46, T-47, T-48) → (T-45 após T-42; T-49 após T-48) → (T-50 após T-43/T-49; T-52 após T-48/T-49) → T-51 | Responsividade, segurança, acessibilidade, desempenho, usabilidade, operação e gates avaliados. T-52 precisa da janela mensal; iniciá-la assim que T-48/T-49 permitirem. |
+
+**Tamanho por fatia:** fatia 0 é curta, embora T-02/T-07 tenham incerteza alta; fatia 1 é a menor entrega visível; fatia 2 é a maior por combinar API temporal, atualização e UI; fatia 3 é controlada por mocks; fatia 4 tem atividades paralelas, mas inclui a janela temporal de T-52.
+
 ## Matriz RF → Tarefas
 
 Tarefas **Implementação** criam comportamento; **Verificação** comprova critérios e não substitui implementação. T-04 define contratos compartilhados. T-01 a T-03 são pré-requisitos gerais, omitidos das linhas para manter o foco funcional.
 
 | Requisito funcional | Tarefas de implementação | Tarefas de verificação | Lacuna |
 | --- | --- | --- | --- |
-| RF-01 — Buscar e selecionar cidades | T-05 valida entrada; T-13 adapta geocoding; T-20/T-21 orquestram busca; T-28 apresenta resultados; T-36 conecta seleção à jornada. | T-09, T-14, T-22, T-29, T-40. | Nenhuma identificada. |
+| RF-01 — Buscar e selecionar cidades | T-05 valida entrada; T-13 adapta geocoding; T-20/T-21 orquestram busca; T-28 apresenta resultados; T-54 entrega busca antes do forecast; T-36 completa a jornada. | T-09, T-14, T-22, T-29, T-40. | Nenhuma identificada. |
 | RF-02 — Exibir clima atual | T-08 traduz condições; T-15 normaliza dados atuais; T-17 fornece consulta; T-23/T-24 guardam e atualizam estado; T-30/T-32 apresentam clima e referência; T-36 integra. | T-10, T-18, T-26, T-34, T-35, T-38, T-40. | Nenhuma identificada. |
 | RF-03 — Previsão de hoje e quatro dias | T-07 trata datas/fusos; T-08 traduz condições; T-16 normaliza os cinco dias; T-17 consulta; T-23/T-25 mantêm e atualizam estado; T-31/T-32 apresentam previsão/período; T-36 integra. | T-10, T-19, T-26, T-27, T-34, T-38, T-40. | Nenhuma identificada. |
 | RF-04 — Alternar Celsius/Fahrenheit | T-06 converte/formata; T-30/T-31 derivam a apresentação; T-33 controla seleção; T-36 mantém Unit e evita novo request. | T-53, T-34, T-35, T-38, T-40. | Nenhuma identificada. |
-| RF-05 — Estados inicial, loading, sucesso, vazio e erro | T-20/T-21 modelam estados da busca; T-23/T-24 modelam resultado meteorológico; T-28/T-32 apresentam estados; T-36 compõe a jornada. | T-22, T-26, T-29, T-35, T-38, T-41. | Nenhuma identificada. |
+| RF-05 — Estados inicial, loading, sucesso, vazio e erro | T-20/T-21 modelam estados da busca; T-23/T-24 modelam resultado meteorológico; T-28/T-32 apresentam estados; T-54 compõe a busca isolada; T-36 completa a jornada. | T-22, T-26, T-29, T-35, T-38, T-41. | Nenhuma identificada. |
 | RF-06 — Falhas, timeout e concorrência | T-11 classifica transporte; T-21/T-24 protegem operações concorrentes; T-25 suspende atualização automática após falha; T-32 apresenta retry/bloqueio; T-36 integra. | T-12, T-22, T-26, T-27, T-35, T-38, T-41. | Nenhuma identificada. |
 | RF-07 — Referências temporais e atualização | T-07 formata datas/fusos; T-15/T-17 produzem referências e consultedAt; T-25 agenda atualização; T-32 apresenta horários/ação Atualizar; T-36 integra. | T-10, T-18, T-19, T-26, T-27, T-35, T-38, T-41. | Nenhuma identificada. |
 | RF-08 — pt-BR, sem conta, acessível e com atribuição | T-08 fornece catálogo; T-28/T-30/T-31/T-32/T-33 apresentam textos e controles; T-32 apresenta atribuição; T-36 oferece jornada sem conta; T-37 aplica estilos/foco. | T-10, T-29, T-35, T-38, T-40, T-44, T-45. | Nenhuma identificada; auditoria manual continua sendo gate, não implementação. |

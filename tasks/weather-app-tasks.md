@@ -3,7 +3,8 @@
 - **Entrada:** [plano técnico](../plans/weather-app-plan.md); requisitos e valores esperados na [spec](../specs/weather-app-spec.md).
 - **Status:** todas as tarefas estão pendentes. Criar este backlog não aprova OQ, implementa funcionalidades ou comprova testes.
 - **Granularidade:** cada tarefa altera no máximo dois arquivos relevantes e tem um único tipo: UI, Data, Test ou Infra. Os caminhos indicados são prováveis; não exigem criar arquivos vazios. Mudanças que excedam esse limite devem ser decompostas antes da execução.
-- **Ordem:** dependências devem estar concluídas antes da tarefa. IDs referenciam tarefas deste documento; intervalos de AC incluem todos os IDs entre as extremidades. Testes separados não dispensam a validação focada da tarefa de implementação: usar fixtures/sondas locais até existir a suíte correspondente.
+- **Ordem:** após as aprovações e o setup, executar tipos → funções puras → services → hooks → componentes → integração → testes → hardening. A posição no documento define a ordem, não o número do ID; IDs existentes são preservados para manter referências. Dependências devem estar concluídas antes da tarefa; tarefas independentes da mesma etapa podem avançar em paralelo. Intervalos de AC incluem todos os IDs entre as extremidades.
+- **Testes por etapa:** a etapa Testes concentra a criação das suítes completas; não adia a validação focada de cada implementação. Usar testes existentes ou sondas temporárias até a suíte correspondente estar disponível. O setup T-03 é pré-requisito técnico, não a execução antecipada da etapa Testes. Hardening inclui avaliações especializadas de layout, segurança, desempenho e operação.
 - **Conclusão de src/tests:** além da verificação indicada, executar pnpm lint, pnpm build e pnpm test. No bootstrap, registrar explicitamente gates ainda impossíveis por falta das fundações; não registrar falhas como sucesso nem fechar a entrega antes de T-38. E2E passa a ser gate das entregas integradas após T-39.
 - **Evidências:** testes identificam os AC cobertos e executam separadamente suas variantes. Avaliações manuais registram versão, ambiente, responsável, resultado e evidência no plano; itens não executados permanecem pendentes. Ao alterar conteúdo de produto, atualizar a spec antes de tarefas dependentes.
 
@@ -40,7 +41,7 @@
 - **Tipo:** Data
 - **Descrição:** consolidar os modelos e resultados discriminados do plano.
 - **Rastreabilidade:** RF-01 a RF-08; RNF-08.
-- **Dependências:** T-01, T-02.
+- **Dependências:** T-01, T-02, T-03.
 - **Arquivos prováveis:** src/types/weather.ts.
 - **Critérios de aceite:** exportar City, CurrentWeather, ForecastDay, WeatherData e Unit com literais celsius/fahrenheit, null explícito e instantes ISO UTC; erros/resultados distinguem vazio, falha e sucesso parcial. Nenhum any ou dependência React/DTO bruto no domínio.
 - **Verificação:** checagem TypeScript strict e revisão dos campos contra Data Model do plano; documentar cardinalidade cinco como invariante do adaptador, não garantia automática de um array.
@@ -85,7 +86,7 @@
 - **Tipo:** Test
 - **Descrição:** automatizar os limites de entrada e de apresentação de temperatura.
 - **Rastreabilidade:** RF-01, RF-04; AC-01.4, AC-01.5, AC-04.2, AC-04.3, AC-04.4.
-- **Dependências:** T-03, T-05, T-06.
+- **Dependências:** T-03, T-05, T-06, T-36.
 - **Arquivos prováveis:** tests/unit/lib/search.test.ts; tests/unit/lib/temperature.test.ts.
 - **Critérios de aceite:** cobrir todas as variantes de T-05/T-06, caracteres Unicode fora do BMP e zero negativo; dez alternâncias preservam os originais. Cada cenário declara entrada e saída literal esperada.
 - **Verificação:** pnpm test -- tests/unit/lib/search.test.ts tests/unit/lib/temperature.test.ts passa sem rede.
@@ -94,7 +95,7 @@
 - **Tipo:** Test
 - **Descrição:** automatizar fusos, fronteiras de datas e catálogo meteorológico.
 - **Rastreabilidade:** RF-02, RF-03, RF-07, RF-08; AC-02.4, AC-03.2, AC-03.5, AC-07.1, AC-07.2, AC-08.2, AC-08.3.
-- **Dependências:** T-03, T-07, T-08.
+- **Dependências:** T-03, T-07, T-08, T-36.
 - **Arquivos prováveis:** tests/unit/lib/calendar.test.ts; tests/unit/lib/weatherCodes.test.ts.
 - **Critérios de aceite:** verificar fronteiras de mês/ano/DST e fuso inválido; percorrer todos os códigos da spec e o fallback. Resultados não dependem da data ou do fuso da máquina executora.
 - **Verificação:** executar os dois arquivos no Vitest com instantes fixos.
@@ -105,7 +106,7 @@
 - **Tipo:** Data
 - **Descrição:** classificar falhas, cancelamento e limite de espera comuns aos dois endpoints.
 - **Rastreabilidade:** RF-06; AC-06.1, AC-06.4, AC-06.6; RNF-07, RNF-11.
-- **Dependências:** T-04.
+- **Dependências:** T-05, T-06, T-07, T-08.
 - **Arquivos prováveis:** src/services/http.ts.
 - **Critérios de aceite:** obter e ler JSON como unknown em até 10 s; distinguir HTTP, rede, corpo inválido, timeout e cancelamento voluntário. Interpretar Retry-After numérico ou data futura; fallback 60 s; limpar timer em todos os desfechos e nunca repetir automaticamente.
 - **Verificação:** promessas controladas demonstram espera em 9.999 ms e timeout em 10.000 ms, incluindo corpo que não termina de chegar.
@@ -114,7 +115,7 @@
 - **Tipo:** Test
 - **Descrição:** verificar o contrato do transporte com mock de fetch.
 - **Rastreabilidade:** RF-06; AC-06.1, AC-06.4, AC-06.6; RNF-07.
-- **Dependências:** T-03, T-11.
+- **Dependências:** T-03, T-11, T-36.
 - **Arquivos prováveis:** tests/unit/services/http.test.ts.
 - **Critérios de aceite:** variantes de rede, HTTP 500, JSON inválido, 429, Retry-After em segundos/data/inacessível e expiração durante leitura têm resultados distintos previstos. Abort por substituição não vira timeout nem erro visível; timers ficam limpos.
 - **Verificação:** Vitest com fake timers e mock restaurado entre testes; zero acesso à rede real.
@@ -132,7 +133,7 @@
 - **Tipo:** Test
 - **Descrição:** verificar request e normalização sem depender da fonte ao vivo.
 - **Rastreabilidade:** RF-01; AC-01.1, AC-01.2, AC-01.5, AC-01.6, AC-01.7, AC-01.8; RNF-11.
-- **Dependências:** T-03, T-13.
+- **Dependências:** T-03, T-13, T-36.
 - **Arquivos prováveis:** tests/unit/services/geocoding.test.ts.
 - **Critérios de aceite:** inspecionar parâmetros decodificados e resultados; validar extremos de coordenadas, números inválidos, nome ausente e chave estável. Uma entrada com marcação permanece texto, sem alterar host, parâmetros de controle ou documento.
 - **Verificação:** teste focado com mock de fetch cobre cada variante isoladamente.
@@ -168,7 +169,7 @@
 - **Tipo:** Test
 - **Descrição:** automatizar o contrato temporal e os campos das condições atuais.
 - **Rastreabilidade:** RF-02, RF-07; AC-02.1 a AC-02.5, AC-07.1, AC-07.2.
-- **Dependências:** T-03, T-17.
+- **Dependências:** T-03, T-17, T-36.
 - **Arquivos prováveis:** tests/unit/services/forecastCurrent.test.ts.
 - **Critérios de aceite:** cobrir instante local sem offset segundo T-02, referência ausente/inconsistente, zero, negativos, código desconhecido e todas as fronteiras de AC-02.5; previsão válida sobrevive à invalidade atual.
 - **Verificação:** teste focado com relógio fixo e fixtures representativas do contrato validado.
@@ -177,7 +178,7 @@
 - **Tipo:** Test
 - **Descrição:** automatizar a consulta e a classificação do snapshot inteiro.
 - **Rastreabilidade:** RF-03, RF-05; AC-03.1 a AC-03.6, AC-05.5, AC-05.6.
-- **Dependências:** T-03, T-17.
+- **Dependências:** T-03, T-17, T-36.
 - **Arquivos prováveis:** tests/unit/services/forecast.test.ts.
 - **Critérios de aceite:** verificar parâmetros, datas locais/DST, arrays desalinhados, duplicatas, pares invertidos e lacunas; testar completo, parcial e erro global. Cada resultado esperado é independente da disponibilidade real da API.
 - **Verificação:** executar o arquivo no Vitest com fetch e relógio controlados.
@@ -188,7 +189,7 @@
 - **Tipo:** Data
 - **Descrição:** criar o hook de busca com termo editado separado do enviado.
 - **Rastreabilidade:** RF-01, RF-05; AC-01.4, AC-05.2, AC-05.3.
-- **Dependências:** T-13.
+- **Dependências:** T-13, T-17.
 - **Arquivos prováveis:** src/hooks/useCitySearch.ts.
 - **Critérios de aceite:** idle/loading/success/empty/error exclusivos; editar não dispara rede; envio válido limpa resultados anteriores, entrada inválida não chama service. Vazio permite nova pesquisa e não é erro de rede.
 - **Verificação:** usar service simulado para percorrer cada transição e contar chamadas.
@@ -206,7 +207,7 @@
 - **Tipo:** Test
 - **Descrição:** automatizar transições e concorrência de pesquisa.
 - **Rastreabilidade:** RF-01, RF-05, RF-06; AC-01.4, AC-05.2, AC-05.3, AC-06.2, AC-06.5, AC-06.6, AC-06.7.
-- **Dependências:** T-03, T-21.
+- **Dependências:** T-03, T-21, T-36.
 - **Arquivos prováveis:** tests/unit/hooks/useCitySearch.test.ts.
 - **Critérios de aceite:** cobrir os estados, edição, vazio, retry, duplicação, sucesso/erro antigo, expiração do bloqueio e desmontagem sob Strict Mode; nenhuma chamada causada apenas por digitação ou expiração do cooldown.
 - **Verificação:** renderHook, promessas controladas e fake timers; nomes dos testes incluem os AC correspondentes.
@@ -215,7 +216,7 @@
 - **Tipo:** Data
 - **Descrição:** criar o estado da cidade e do snapshot vigente.
 - **Rastreabilidade:** RF-02, RF-03, RF-05, RF-07; AC-01.3, AC-05.1, AC-05.4, AC-05.5, AC-05.6, AC-07.3, AC-07.4.
-- **Dependências:** T-17.
+- **Dependências:** T-13, T-17.
 - **Arquivos prováveis:** src/hooks/useWeather.ts.
 - **Critérios de aceite:** iniciar idle sem cidade; seleção/Atualizar faz uma consulta; loading oculta dados anteriores; sucesso guarda um snapshot completo/parcial; erro não restaura cache e permite tentar novamente a cidade vigente.
 - **Verificação:** percorrer seleção → loading → sucesso → atualização → falha com service simulado e inspeção do estado renderizável.
@@ -242,7 +243,7 @@
 - **Tipo:** Test
 - **Descrição:** automatizar a máquina de estado meteorológica sem atualização periódica.
 - **Rastreabilidade:** RF-05, RF-06, RF-07; AC-05.1, AC-05.4, AC-05.5, AC-05.6, AC-06.1, AC-06.2, AC-06.3, AC-06.4, AC-06.6, AC-06.7, AC-07.3, AC-07.4.
-- **Dependências:** T-03, T-24.
+- **Dependências:** T-03, T-24, T-36.
 - **Arquivos prováveis:** tests/unit/hooks/useWeather.test.ts.
 - **Critérios de aceite:** cobrir idle/loading/complete/partial/error, retry, ausência de cache, timeout e respostas antigas; seleção B permanece após sucesso/erro de A. Cleanup e bloqueio valem também sob Strict Mode.
 - **Verificação:** renderHook com serviço e relógio controlados; testar carregamento e desfecho separadamente.
@@ -251,7 +252,7 @@
 - **Tipo:** Test
 - **Descrição:** verificar os gatilhos periódicos e suas exceções.
 - **Rastreabilidade:** RF-07, RF-06; AC-06.8, AC-07.5, AC-07.6; BR-16.
-- **Dependências:** T-03, T-25.
+- **Dependências:** T-03, T-25, T-36.
 - **Arquivos prováveis:** tests/unit/hooks/useWeatherRefresh.test.ts.
 - **Critérios de aceite:** testar 15 min, página oculta, retorno, virada local antes de 15 min, gatilhos simultâneos e suspensão após erro; nenhum fetch ao simples vencer do cooldown. Indicação de consulta desatualizada deriva de consultedAt quando ainda houver snapshot visível com mais de 15 min.
 - **Verificação:** fake timers e visibilitychange, sem esperas reais ou sleep fixo.
@@ -262,7 +263,7 @@
 - **Tipo:** UI
 - **Descrição:** apresentar busca e seleção por props, sem fetch no componente.
 - **Rastreabilidade:** RF-01, RF-05, RF-08; AC-01.1, AC-01.2, AC-01.4, AC-01.6, AC-05.2, AC-05.3, AC-08.4, AC-08.5.
-- **Dependências:** T-04, T-05, T-08.
+- **Dependências:** T-04, T-05, T-08, T-21, T-25.
 - **Arquivos prováveis:** src/components/CitySearch.tsx.
 - **Critérios de aceite:** botão/Enter emitam um envio; resultados identificados e selecionáveis por teclado; validação associada ao input, loading/empty/error distintos e mensagens do catálogo. Nenhuma seleção automática ou request durante render.
 - **Verificação:** renderizações com props de cada estado e callbacks espiados; foco não se move por chegada de resultado/erro.
@@ -271,7 +272,7 @@
 - **Tipo:** Test
 - **Descrição:** verificar interação e acessibilidade da busca isolada.
 - **Rastreabilidade:** RF-01, RF-05, RF-08; AC-01.1, AC-01.2, AC-01.4, AC-01.5, AC-01.6, AC-05.2, AC-05.3, AC-08.4, AC-08.5.
-- **Dependências:** T-03, T-28.
+- **Dependências:** T-03, T-28, T-36.
 - **Arquivos prováveis:** tests/unit/components/CitySearch.test.tsx.
 - **Critérios de aceite:** queries por role/label verificam os nomes, regiões, países, mensagem vazia e erro associado; Enter e clique disparam uma ação cada; teclado alcança e seleciona resultado sem armadilha de foco.
 - **Verificação:** Testing Library e user-event, sem depender de classes Tailwind.
@@ -280,7 +281,7 @@
 - **Tipo:** UI
 - **Descrição:** renderizar valores normalizados e unidade recebida por props.
 - **Rastreabilidade:** RF-02, RF-04, RF-08; AC-02.1 a AC-02.4, AC-04.2, AC-04.3, AC-08.2.
-- **Dependências:** T-06, T-08.
+- **Dependências:** T-06, T-08, T-21, T-25.
 - **Arquivos prováveis:** src/components/CurrentWeather.tsx.
 - **Critérios de aceite:** apresentar cidade, temperatura formatada e condição do catálogo; zero/negativos preservados, campos ausentes Indisponível e código desconhecido Condição indisponível. Troca de props de unidade altera apenas apresentação.
 - **Verificação:** snapshots de dados controlados por inspeção de conteúdo/roles, sem snapshot de implementação ou chamadas externas.
@@ -289,7 +290,7 @@
 - **Tipo:** UI
 - **Descrição:** compor item diário e sequência das cinco datas normalizadas.
 - **Rastreabilidade:** RF-03, RF-04; AC-03.1, AC-03.3, AC-04.2, AC-04.3.
-- **Dependências:** T-06, T-07, T-08.
+- **Dependências:** T-06, T-07, T-08, T-21, T-25.
 - **Arquivos prováveis:** src/components/ForecastDay.tsx; src/components/Forecast.tsx.
 - **Critérios de aceite:** cinco datas com mínima/máxima/condição, incluindo lacunas, sem sexto dia ou repetição; key estável pela data, não índice. Rótulos de mínima/máxima e unidade são identificáveis sem depender de cor.
 - **Verificação:** montar props com 27 a 31/10/2026 e ausência em 29/10; conferir data, valores e conteúdo indisponível.
@@ -298,7 +299,7 @@
 - **Tipo:** UI
 - **Descrição:** renderizar status e ações, sem iniciar efeitos no componente.
 - **Rastreabilidade:** RF-05, RF-06, RF-07, RF-08; AC-05.4, AC-05.5, AC-05.6, AC-06.1, AC-06.6, AC-07.1, AC-07.2, AC-07.4, AC-08.3, AC-08.5, AC-08.6.
-- **Dependências:** T-07, T-08.
+- **Dependências:** T-07, T-08, T-21, T-25.
 - **Arquivos prováveis:** src/components/WeatherStatus.tsx.
 - **Critérios de aceite:** rótulos Válido em/Período/Consultado em e fuso corretos; aviso parcial/erro/carregamento conforme props; retry bloqueado no prazo; Atualizar emite callback. Atribuição Open-Meteo acessível e nenhum horário do modelo inferido; anúncios não deslocam foco nem repetem contagem a cada segundo.
 - **Verificação:** props com relógios distintos e cooldown; inspecionar conteúdo, nomes acessíveis e eventos emitidos.
@@ -307,7 +308,7 @@
 - **Tipo:** UI
 - **Descrição:** construir controle sem estado duplicado de temperatura.
 - **Rastreabilidade:** RF-04, RF-08; AC-04.1, AC-04.2, AC-04.3, AC-08.4.
-- **Dependências:** T-04, T-08.
+- **Dependências:** T-04, T-08, T-21, T-25.
 - **Arquivos prováveis:** src/components/TemperatureToggle.tsx.
 - **Critérios de aceite:** Celsius/Fahrenheit têm nomes acessíveis e seleção identificável programaticamente; ação emite Unit correspondente, inclusive durante loading. Sem fetch, persistência ou cópia de dados meteorológicos.
 - **Verificação:** usar callbacks espiados para seleção por clique e teclado, com estado controlado por props.
@@ -316,7 +317,7 @@
 - **Tipo:** Test
 - **Descrição:** verificar conteúdo atual e diário sem hooks nem rede.
 - **Rastreabilidade:** RF-02, RF-03, RF-04; AC-02.1 a AC-02.4, AC-03.1, AC-03.3, AC-04.2, AC-04.3.
-- **Dependências:** T-03, T-30, T-31.
+- **Dependências:** T-03, T-30, T-31, T-36.
 - **Arquivos prováveis:** tests/unit/components/CurrentWeather.test.tsx; tests/unit/components/Forecast.test.tsx.
 - **Critérios de aceite:** dados completos, zero/negativos, lacunas, código desconhecido e duas unidades têm as saídas da spec; cinco datas permanecem após rerender, sem valores inventados.
 - **Verificação:** testes de props e rerender com conteúdo literal esperado, sem snapshots extensos de HTML.
@@ -325,7 +326,7 @@
 - **Tipo:** Test
 - **Descrição:** verificar ações, catálogo, referências e acessibilidade dos controles.
 - **Rastreabilidade:** RF-04 a RF-08; AC-04.1, AC-05.4, AC-05.5, AC-05.6, AC-06.6, AC-07.1, AC-07.2, AC-07.4, AC-08.2, AC-08.3, AC-08.5, AC-08.6.
-- **Dependências:** T-03, T-32, T-33.
+- **Dependências:** T-03, T-32, T-33, T-36.
 - **Arquivos prováveis:** tests/unit/components/WeatherStatus.test.tsx; tests/unit/components/TemperatureToggle.test.tsx.
 - **Critérios de aceite:** callbacks e seleção programática corretos, retry bloqueado sem chamar ação, rótulos temporais distintos e link de atribuição correto. Mensagem de erro não contém stack trace ou resposta bruta.
 - **Verificação:** Testing Library com consultas acessíveis e contagem de callbacks.
@@ -343,7 +344,7 @@
 - **Tipo:** UI
 - **Descrição:** aplicar o tema existente aos componentes já compostos.
 - **Rastreabilidade:** RF-08; RNF-01, RNF-03.
-- **Dependências:** T-36.
+- **Dependências:** T-40, T-41, T-44.
 - **Arquivos prováveis:** src/index.css.
 - **Critérios de aceite:** tema dark glassmorphism preservado; em 320, 375, 768, 1024, 1440 e 1920 CSS px não há corte, sobreposição ou rolagem horizontal; zoom 200% mantém controles operáveis e foco não encoberto.
 - **Verificação:** inspeção nos estados inicial, carregando, sucesso, parcial, vazio e erro. Se forem necessárias alterações em mais de um componente, criar tarefa UI específica antes de ampliá-la.
@@ -352,7 +353,7 @@
 - **Tipo:** Test
 - **Descrição:** verificar a integração React e fechar os gates de bootstrap.
 - **Rastreabilidade:** RF-01 a RF-08; AC-01.3, AC-04.1 a AC-04.6, AC-05.1, AC-07.3, AC-08.1.
-- **Dependências:** T-03, T-09, T-10, T-12, T-14, T-18, T-19, T-22, T-26, T-27, T-29, T-34, T-35, T-37.
+- **Dependências:** T-03, T-09, T-10, T-12, T-14, T-18, T-19, T-22, T-26, T-27, T-29, T-34, T-35, T-36.
 - **Arquivos prováveis:** tests/unit/App.test.tsx.
 - **Critérios de aceite:** seleção, carregamento, sucesso, parcial, erro, retry e toggle refletem o estado correto; unidade não gera request e inicia em Celsius em nova montagem. pnpm lint, pnpm build e pnpm test terminam com código zero; registrar falhas sem suprimir testes.
 - **Verificação:** executar teste focado e os três gates, mantendo evidência de comandos e resultados.
@@ -390,7 +391,7 @@
 - **Tipo:** Test
 - **Descrição:** automatizar a ausência de overflow e registrar inspeção visual.
 - **Rastreabilidade:** RF-01, RF-02, RF-03, RF-08; RNF-01, RNF-10.
-- **Dependências:** T-39, T-40.
+- **Dependências:** T-37, T-39, T-40.
 - **Arquivos prováveis:** tests/e2e/weather-layout.spec.ts.
 - **Critérios de aceite:** em 320/375/768/1024/1440/1920 px, testar estados e orientação; largura rolável não excede viewport, textos e controles essenciais têm caixas visíveis e sem sobreposição. Jornada mobile funciona por toque e a inspeção de capturas é registrada, não inferida apenas de DOM.
 - **Verificação:** Playwright com screenshots e medidas de layout, mais inspeção de zoom real a 200% na avaliação manual T-45.
@@ -399,7 +400,7 @@
 - **Tipo:** Test
 - **Descrição:** exercitar entradas/respostas não confiáveis e inspecionar armazenamento/rede.
 - **Rastreabilidade:** RF-01, RF-04, RF-08; AC-04.6, AC-08.1; RNF-08, RNF-11.
-- **Dependências:** T-39.
+- **Dependências:** T-37, T-39.
 - **Arquivos prováveis:** tests/e2e/weather-security.spec.ts.
 - **Critérios de aceite:** nomes contendo marcação e manipuladores não executam scripts ou navegação; hosts permanecem previstos; recarga perde cidade/unidade; nenhum dado de uso é enviado a telemetria própria ou gravado em local/sessionStorage, IndexedDB ou cookies pela aplicação.
 - **Verificação:** interceptar rede, observar execução e inspecionar armazenamento após jornada; registros externos são avaliados separadamente em T-50.
@@ -426,7 +427,7 @@
 - **Tipo:** Test
 - **Descrição:** reproduzir a medição de latência aprovada da spec.
 - **Rastreabilidade:** RF-01, RF-02, RF-03; RNF-04.
-- **Dependências:** T-39, T-40.
+- **Dependências:** T-37, T-39, T-40.
 - **Arquivos prováveis:** tests/e2e/weather-performance.spec.ts; plans/weather-app-plan.md.
 - **Critérios de aceite:** cem medições por operação após aquecimento, resposta controlada em 500 ms e ambiente de referência registrado; p95 é o 95º valor ordenado e <=2 s. Separar medições reais do provedor, sem atribuir a ele garantia do benchmark.
 - **Verificação:** relatório com amostras e cálculo reproduzível; ambiente diferente exige aprovação explícita, não resultado comparado silenciosamente.
@@ -435,7 +436,7 @@
 - **Tipo:** Test
 - **Descrição:** medir as jornadas das personas com participantes, sem substituir por teste de clique.
 - **Rastreabilidade:** RF-01, RF-02, RF-03, RF-04; RNF-02.
-- **Dependências:** T-40.
+- **Dependências:** T-37, T-40.
 - **Arquivos prováveis:** plans/weather-app-plan.md.
 - **Critérios de aceite:** cinco participantes por jornada de Mariana/Rafael, ao menos quatro sem ajuda em <=30 s e <=60 s respectivamente; Alex troca unidade em uma ação. Registrar protocolo, tempos e resultados sem incluir dados pessoais desnecessários; ausência de participantes deixa avaliação pendente.
 - **Verificação:** relatório anonimizado com resultados individuais e cálculo do atendimento das metas.
@@ -446,7 +447,7 @@
 - **Tipo:** Infra
 - **Descrição:** tornar operacional a medição de disponibilidade e seus limites.
 - **Rastreabilidade:** RF-01, RF-02, RF-03; RNF-05; OQ-10.
-- **Dependências:** T-02, T-40.
+- **Dependências:** T-02, T-37, T-40.
 - **Arquivos prováveis:** plans/weather-app-plan.md.
 - **Critérios de aceite:** registrar hospedagem aprovada, responsável, orçamento, origem da sonda e periodicidade de 5 min; separar página/jornada com provedor controlado da consulta real externa. Incluir falhas/manutenção e fórmula do percentual; não afirmar 99,9% sem janela medida.
 - **Verificação:** revisão operacional e execução de uma sonda de sucesso e outra de falha com registro de horários e classificação.
@@ -473,9 +474,9 @@
 - **Tipo:** Test
 - **Descrição:** verificar se o conjunto implementado tem evidências suficientes, sem declarar produção pronta por checklist vazio.
 - **Rastreabilidade:** RF-01 a RF-08; RNF-01 a RNF-11.
-- **Dependências:** T-38, T-40, T-41, T-42, T-43, T-44, T-45, T-46, T-47, T-48, T-49, T-50.
+- **Dependências:** T-38, T-40, T-41, T-42, T-43, T-44, T-45, T-46, T-47, T-48, T-49, T-50, T-52.
 - **Arquivos prováveis:** tasks/weather-app-tasks.md; plans/weather-app-plan.md.
-- **Critérios de aceite:** cada um dos 51 AC tem teste/evidência referenciado e resultado; pnpm lint/build/test/test:e2e têm código zero. Cada RNF e OQ tem evidência ou bloqueio declarado; RNF-05 mensal permanece pendente até T-52. A revisão não autoriza lançamento enquanto gates da spec não forem atendidos ou formalmente revisados.
+- **Critérios de aceite:** cada um dos 51 AC tem teste/evidência referenciado e resultado; pnpm lint/build/test/test:e2e têm código zero. Cada RNF e OQ tem evidência ou bloqueio declarado; incorporar o relatório mensal de T-52, ou a revisão formal do requisito antes de considerá-lo atendido. A revisão não autoriza lançamento enquanto gates da spec não forem atendidos ou formalmente revisados.
 - **Verificação:** conferir matriz, relatórios, comandos e bloqueios; tarefas não executadas não podem ser marcadas concluídas.
 
 ### T-52 — Medir disponibilidade na janela operacional
@@ -485,7 +486,7 @@
 - **Dependências:** T-48, T-49.
 - **Arquivos prováveis:** plans/weather-app-plan.md.
 - **Critérios de aceite:** relatório de um mês com sondagens a cada 5 min, sucessos, falhas e manutenção; percentual da aplicação >=99,9% e sucesso externo medido separadamente. Janela incompleta permanece pendente; eventual política de liberação inicial exige revisão explícita de OQ-10, não evidência fictícia.
-- **Verificação:** relatório exportado do monitoramento e cálculo reproduzível; atualizar o resultado operacional da revisão T-51 quando a evidência existir.
+- **Verificação:** relatório exportado do monitoramento e cálculo reproduzível, entregue como entrada para a auditoria final T-51.
 
 ## Matriz de Cobertura Planejada
 

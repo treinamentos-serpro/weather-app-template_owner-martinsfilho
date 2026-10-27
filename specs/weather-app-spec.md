@@ -212,61 +212,64 @@ Nomes acessíveis mínimos: “Buscar cidade”, “Pesquisar”, “Selecionar 
 
 ## Non-Functional Requirements
 
-| ID | Requisito e forma de verificação | Status / pendência |
+Os valores abaixo são critérios propostos de aprovação da baseline, não SLAs já acordados. A validação de release deve registrar ambiente, versão, resultado e evidência de cada requisito.
+
+| ID | Requisito verificável | Evidência de aceite |
 | --- | --- | --- |
-| RNF-01 | Manter conteúdo essencial legível e controles utilizáveis em celulares e outras telas. Verificar ausência de sobreposição, corte e rolagem horizontal nas larguras aprovadas. | Faixa de 320 px a 1440 px é candidata, não aprovada; OQ-02. |
-| RNF-02 | Permitir completar a jornada principal sem etapas de cadastro ou ações sem relação com a consulta. Validar com execução da jornada e avaliação com o público escolhido. | Meta de tempo e taxa de sucesso pendentes; OQ-01. |
-| RNF-03 | Permitir operação por teclado, foco perceptível, nomes acessíveis dos controles e percepção dos estados com tecnologia assistiva; não depender exclusivamente de cor. | WCAG 2.2 AA é meta candidata; confirmar abrangência e matriz de avaliação em OQ-11. |
-| RNF-04 | Medir tempos de busca e consulta separadamente, registrando condições de dispositivo e rede e distinguindo tempo total percebido do tempo atribuível à aplicação. | Até 2 s no percentil 95 é referência não aprovada; janela e método pendentes em OQ-09. |
-| RNF-05 | Definir disponibilidade do produto, janela de medição e tratamento de falhas externas antes de assumir um compromisso operacional. | 99,9% mensal não é SLA aprovado nem garantia do Open-Meteo; OQ-10. |
-| RNF-06 | Tornar verificável a referência temporal dos dados por RF-07 e definir idade máxima aceitável e gatilhos de atualização. | Limites e frequência pendentes; OQ-07. |
-| RNF-07 | Tratar indisponibilidade, resposta incompleta e expiração da espera sem travamento nem atribuição de dados à cidade errada; verificar AC-02.3, AC-03.3 e AC-06.1 a AC-06.4. | Política de cache, timeout e recuperação parcial pendente; OQ-08. |
-| RNF-08 | Não exigir API key do usuário, autenticação ou persistência dos dados da aplicação em servidor. Verificar a jornada e o desenho de tratamento de dados no plano. | Decisões confirmadas D-01 e D-04; armazenamento local e telemetria pendentes em OQ-06 e OQ-12. |
-| RNF-09 | Usar Open-Meteo conforme condições aplicáveis ao uso pretendido, incluindo atribuição quando exigida. | Validar licença, cobertura, custo e limites antes de aprovar a integração; OQ-13. |
+| RNF-01 | Layout entre 320 e 1440 CSS px, em retrato e paisagem, sem rolagem horizontal da página, sobreposição ou perda de controles essenciais. | Jornada nas larguras 320, 375, 768, 1024 e 1440 px, mais 1920 px para verificar continuidade fora da faixa mínima. |
+| RNF-02 | Mariana conclui busca e leitura atual em até 30 s; Rafael identifica destino e cinco dias em até 60 s; Alex muda unidade em uma ação. | Sessões com cinco participantes por jornada de Mariana/Rafael, ao menos quatro dentro da meta, sem ajuda; requisito de Alex verificado funcionalmente. |
+| RNF-03 | WCAG 2.2 AA: teclado, foco visível não encoberto, contraste, nomes, mensagens de estado e redimensionamento a 200%, sem perda de conteúdo ou operação. | Auditoria das páginas e estados, verificação automática sem violações detectadas e avaliação manual com NVDA/Firefox e VoiceOver/Safari; scanner sozinho não comprova conformidade. |
+| RNF-04 | Com respostas controladas após 500 ms, p95 de envio até resultado renderizado <= 2 s por busca e consulta. Ambiente: 4 núcleos lógicos, 8 GB RAM, navegador estável e viewport 375 × 812. | Cem execuções por operação após aquecimento; p95 é o 95º valor ordenado. Registrar separadamente desempenho com provedor real, sem tratá-lo como garantia externa. |
+| RNF-05 | Página inicial e jornada sintética com provedor controlado disponíveis em pelo menos 99,9% das sondagens mensais, a cada 5 min. Falhas reais do provedor são medidas separadamente como sucesso da consulta de ponta a ponta. | Relatório operacional com falhas e manutenção incluídas, ponto de medição definido no plano de operação; compromisso condicionado a OQ-10. |
+| RNF-06 | Validar referência atual com limites de 3 h de atraso e 5 min de avanço; atualização e mudança de dia seguem BR-08 e BR-12. | Relógio controlado nos limites e além deles; AC-02.5 e AC-07.4 a AC-07.6. Não promete idade do modelo diário desconhecida. |
+| RNF-07 | Toda operação conclui ou expira em 10 s; erro não causa repetição automática nem mistura respostas. | AC-05.5, AC-05.6 e AC-06.1 a AC-06.8. |
+| RNF-08 | Sem autenticação, persistência de servidor, armazenamento local de cidade/unidade ou telemetria de uso da aplicação nesta baseline. | Revisão do fluxo de dados e inspeção de rede e armazenamento após a jornada; logs do provedor e da hospedagem avaliados separadamente. |
+| RNF-09 | Fonte e atribuição compatíveis com licença e modalidade de uso aprovadas. | Evidência de termos, limites, cobertura, custo e suporte em OQ-13; AC-08.6. Sem essa evidência, lançamento bloqueado. |
+| RNF-10 | Jornada funcional nas versões estável atual e anterior de Chrome, Edge, Firefox e Safari; Safari no iOS e Chrome no Android. | Fixar números de versão e sistemas na aprovação de release; automação em Chromium, Firefox e WebKit não substitui verificação nos navegadores reais. |
+| RNF-11 | Distribuição e chamadas externas por HTTPS; entradas e valores do provedor exibidos como texto, nunca interpretados como HTML executável. | Testar nomes de entrada e resposta contendo marcação e manipuladores de evento: nenhuma execução, navegação inesperada ou alteração estrutural do documento. |
 
 ## Edge Cases
 
-| Caso | Resultado esperado / regra pendente | Rastreabilidade |
+| Caso | Comportamento esperado | Referência |
 | --- | --- | --- |
-| Entrada vazia ou apenas espaços | Não iniciar consulta meteorológica nem selecionar cidade. | AC-01.4 |
-| Nome com acentos, parcial ou em outro idioma | Cobertura e equivalência de busca precisam ser definidas; não prometer correspondências ainda não validadas. | OQ-03 |
-| Cidades homônimas | Exibir região e país disponíveis para distinguir os resultados. | AC-01.2 |
-| Resultado sem região ou sem país | Não inventar informação; definir identificação alternativa quando a distinção continuar insuficiente. | OQ-03 |
-| Nenhuma cidade encontrada | Estado vazio distinto de erro, com possibilidade de corrigir a busca. | AC-05.3 |
-| Troca rápida de cidade | Resposta antiga não substitui a seleção mais recente. | AC-06.3 |
-| Falha de rede, erro do provedor ou limite de requisições | Mensagem compreensível e nova tentativa; política de tentativas automáticas permanece pendente. | AC-06.1, AC-06.2, OQ-08 |
-| Provedor não conclui a resposta | Encerrar a espera conforme limite a aprovar; não manter carregamento infinito. | AC-06.4 |
-| Campo meteorológico ausente ou inválido | Indicar indisponibilidade, sem usar zero como substituto; critérios de sucesso parcial pendentes. | AC-02.3, OQ-04, OQ-08 |
-| Previsão com menos de cinco datas | Identificar lacunas sem deslocar a janela hoje + quatro dias. | AC-03.3 |
-| Temperatura zero ou negativa | Tratar como valor válido quando fornecido validamente pelo provedor, com unidade correta. | AC-02.2, AC-04.2 |
-| Usuário e cidade em fusos diferentes; virada do dia ou horário de verão | Datas seguem o fuso de referência a aprovar, não uma janela fixa de 120 horas. Gatilho de atualização na virada depende de OQ-07. | AC-03.1, AC-03.2, OQ-05 |
-| Alternâncias repetidas de unidade | Não alterar localização, período ou acumular erros de conversão. | AC-04.3, AC-04.4 |
-| Dados em cache após falha | Exibir apenas se a política for aprovada, com identificação e atualização conhecida. | AC-07.3, OQ-08 |
-| Consulta por teclado ou leitor de tela | Controles e estados devem permanecer perceptíveis e operáveis. | RNF-03 |
+| Cidade inexistente ou fora da cobertura | Estado sem correspondências, sem afirmar inexistência geográfica; permitir corrigir termo. | AC-05.3 |
+| Campo vazio, espaços, excesso de tamanho ou símbolos sem letras | Erro local, nenhuma chamada, seleção anterior preservada. | AC-01.4 |
+| Acentos, apóstrofos e hífens | Preservar entrada; apresentar resultados do provedor sem prometer equivalência linguística. | AC-01.5 |
+| Geocoding vazio ou sem campo de resultados | Nenhuma correspondência; tipo incorreto ou todos os registros inválidos são erro de dados. | AC-01.7, AC-01.8 |
+| Homônimos, região ou país ausentes | Qualificar pelo que existir e usar coordenadas quando necessário. | AC-01.2, AC-01.6 |
+| API indisponível, timeout, limite | Encerrar estado pendente, mensagem específica e recuperação sem ciclo automático. | AC-06.1, AC-06.4, AC-06.6 |
+| Resposta parcial, vazia ou malformada | Preservar partes válidas ou erro global conforme BR-09; nunca completar com zero. | AC-05.5, AC-05.6 |
+| Código desconhecido, temperatura zero ou negativa | Fallback textual para condição; preservar temperaturas válidas. | AC-02.2, AC-02.4 |
+| Datas ausentes, duplicadas, fora de ordem ou temperaturas invertidas | Manter janela, ordenar e marcar lacunas; não escolher dados conflitantes. | AC-03.3, AC-03.4 |
+| Fuso inválido, virada de dia, mês, ano ou horário de verão | Não inferir fuso; usar calendário local; atualizar janela na virada. | AC-03.2, AC-03.5, AC-03.6, AC-07.6 |
+| Resposta ou erro antigo após nova busca, cidade ou timeout | Ignorar evento obsoleto sem alterar estado vigente. | AC-06.3 a AC-06.5 |
+| Mudança de unidade durante consulta ou repetidamente | Usar unidade ativa e valores originais sem acumular arredondamento. | AC-04.4, AC-04.5 |
+| Página oculta ou rede interrompida durante atualização | Não iniciar consultas periódicas ocultas; atualizar ao voltar quando necessário; suspender ciclo após erro. | AC-06.8, AC-07.5 |
+| Consulta por teclado ou leitor de tela | Controles e estados perceptíveis e operáveis sem deslocamento automático de foco. | AC-08.4, AC-08.5 |
 
 ## Assumptions
 
-- **AS-01:** A primeira versão é acessível em navegador e utilizável em dispositivos móveis, conforme suposição do discovery. Não confirma PWA ou aplicativos nativos; validar OQ-02.
-- **AS-02:** A consulta meteorológica depende da seleção de uma cidade específica; não há cidade inicial automática confirmada.
-- **AS-03:** A alternância Celsius/Fahrenheit altera somente temperaturas, não localização, período, vento ou precipitação. A apresentação de outras grandezas depende dos campos aprovados.
-- **AS-04:** Temperatura e descrição da condição constituem a proposta mínima para clima atual. A lista definitiva, inclusive campos adicionais e obrigatoriedade, depende de OQ-04.
-- **AS-05:** As histórias usam Mariana, Rafael e Alex, personas candidatas registradas no discovery; não substituem validação de público nem aprovam sua priorização.
-- **AS-06:** Disponibilidade e completude do provedor são dependências, não garantias. A fonte pode fornecer estimativas meteorológicas; a aplicação não promete observação em tempo real nem exatidão absoluta.
-- **AS-07:** As metas numéricas, o padrão formal de acessibilidade e as regras explicitamente pendentes só se tornam compromissos após aprovação registrada.
-- **AS-08:** Sem persistência de servidor não implica ausência de backend, cache local ou registros do provedor. Essas escolhas não estão autorizadas por inferência e devem respeitar OQ-06 e OQ-12.
+- **AS-01:** o perfil proposto detalha um site responsivo, sem PWA nem aplicativos nativos. Aprovação em OQ-02.
+- **AS-02:** seleção explícita inicia a consulta; nenhuma cidade é inferida por IP, dispositivo ou geolocalização.
+- **AS-03:** mínimas e máximas de hoje descrevem o dia local inteiro segundo o provedor, não apenas as horas restantes; dados meteorológicos são estimativas, não garantia de observação em tempo real.
+- **AS-04:** memória durante a visita não equivale a persistência entre visitas; Celsius e cidade vazia após recarga fazem parte da proposta de OQ-06.
+- **AS-05:** Mariana, Rafael e Alex são personas candidatas do discovery; aprovação de prioridade em OQ-01.
+- **AS-06:** instante do modelo diário pode não estar disponível; não o inferir do instante de consulta nem das datas previstas.
+- **AS-07:** metas e catálogo são verificáveis, mas dependem de aprovação registrada; esta revisão não aprova licenças, capacidade ou SLA externo.
+- **AS-08:** ausência de persistência de servidor não determina arquitetura nem elimina registros externos. Validar fluxo de dados em OQ-12 e OQ-13.
 
 ## Risks
 
-| ID | Risco e impacto | Mitigação proposta |
+| ID | Risco | Mitigação / condição de liberação |
 | --- | --- | --- |
-| R-01 | Seleção de cidade homônima gera consulta do local errado. | Identificação regional, seleção explícita e validação das buscas de OQ-03. |
-| R-02 | Falhas, limites ou condições de uso do provedor inviabilizam consultas ou o uso pretendido. | Validar OQ-13 e definir tratamento de falhas; não prometer SLA externo. |
-| R-03 | Campos e granularidade indefinidos provocam retrabalho na experiência e nos contratos de dados. | Resolver OQ-04 e OQ-05 antes de aprovar esses contratos no plano. |
-| R-04 | Mudança de plataforma ou matriz de suporte aumenta escopo e custo. | Aprovar OQ-02 antes de consolidar a arquitetura. |
-| R-05 | Dados antigos ou datas calculadas no fuso errado induzem decisões equivocadas. | Referência temporal visível e aprovação de fuso, validade e atualização. |
-| R-06 | Metas candidatas serem interpretadas como compromissos impede avaliação objetiva da entrega. | Aprovar critérios e condições de medição, mantendo status das pendências explícito. |
-| R-07 | Persistência local, telemetria ou chamadas ao provedor expõem dados além do esperado pelo usuário. | Definir fluxo de dados e política de privacidade antes de introduzir coleta; considerar registros externos. |
-| R-08 | Inclusão implícita de favoritos, alertas ou uso offline amplia o MVP. | Exigir decisão explícita de escopo e atualização desta especificação. |
+| R-01 | Cidade incorreta por homônimos ou dados incompletos. | Seleção explícita e identidade por localização válida; AC-01.2, AC-01.3 e AC-01.6. |
+| R-02 | Uso pretendido incompatível com modalidade sem API key ou limites externos. | Validar OQ-13; se incompatível, retornar à decisão D-01 antes de implementar alternativa. |
+| R-03 | Divergência entre baseline proposta e expectativas dos stakeholders. | Aprovação rastreável de OQ-01 a OQ-12 e atualização do discovery antes do plano. |
+| R-04 | Mudança de plataforma ou matriz de suporte aumenta escopo. | Aprovar OQ-02 antes de consolidar a arquitetura. |
+| R-05 | Datas incorretas, dados antigos ou testes só com mocks ocultam incompatibilidades reais. | Testes de fronteira e validação de contratos e amostras reais do provedor no plano; suíte determinística não substitui essa verificação. |
+| R-06 | Metas operacionais propostas não serem sustentáveis na hospedagem. | Validar orçamento, sondagens e condições de RNF-04 e RNF-05 antes de assumir compromisso. |
+| R-07 | Registros externos expõem buscas ou coordenadas apesar de não haver banco da aplicação. | Avaliar registros, retenção e informação ao usuário em OQ-12 e OQ-13. |
+| R-08 | Funcionalidades adjacentes ampliam o MVP. | Exigir decisão explícita de escopo e atualização dos requisitos e critérios. |
 
 ## Out of Scope
 
@@ -276,31 +279,31 @@ Nomes acessíveis mínimos: “Buscar cidade”, “Pesquisar”, “Selecionar 
 - Persistência de dados da aplicação em servidor, incluindo histórico pessoal e sincronização de preferências por conta.
 - Interface multilíngue; a UI será em pt-BR. Isso não restringe automaticamente a cobertura geográfica.
 
-### Não incluído nesta versão sem nova decisão de escopo
+### Exclusões da baseline proposta, sujeitas à aprovação
 
-- Geolocalização automática, favoritos, alertas meteorológicos e notificações.
-- Histórico meteorológico, mapas, radar e funcionalidades não descritas nos requisitos.
-- Garantia de funcionamento offline, instalação como PWA e aplicativos nativos.
-- Previsão além da janela de hoje e dos quatro dias seguintes.
+- Geolocalização automática, favoritos, alertas, notificações, mapas, radar e histórico.
+- Funcionamento offline, instalação como PWA, aplicativos nativos e cache de recuperação.
+- Previsão horária, dias além de hoje + quatro, sensação térmica, vento, umidade e precipitação.
+- Persistência local de cidade/unidade e telemetria de uso própria.
 
-Persistência local da unidade e eventual cache não são exclusões confirmadas nem funcionalidades aprovadas: permanecem pendentes. Esta especificação não escolhe arquitetura, bibliotecas, componentes, endpoints ou mecanismos de armazenamento.
+As exclusões propostas não substituem a aprovação em OQ-02, OQ-04 a OQ-06, OQ-08 e OQ-12. A arquitetura e os mecanismos internos pertencem ao plano técnico.
 
 ## Open Questions
 
-| ID | Pergunta / decisão necessária | Impacto e momento de resolução |
-| --- | --- | --- |
-| OQ-01 | Qual público/persona é prioritário? Quais metas de conclusão, tempo e satisfação representam sucesso? | Define prioridade e validação de usabilidade; resolver antes da aprovação de produto. |
-| OQ-02 | Confirmamos site responsivo em navegador? Quais navegadores, versões, sistemas, orientações e larguras serão suportados? A faixa candidata de 320 px a 1440 px será adotada? | Define matriz de suporte e testes; resolver antes do plano técnico. |
-| OQ-03 | Quais países e idiomas de busca serão cobertos? Haverá busca parcial e equivalência de acentos? Como tratar localidades sem região/país e resultados numerosos? | Fecha o contrato de busca e identificação; resolver antes de aprovar RF-01. |
-| OQ-04 | Além de temperatura e condição, quais campos atuais são obrigatórios? Quando dados parciais ainda constituem uma consulta útil? | Define conteúdo, estados e critérios de completude; resolver antes de aprovar RF-02. |
-| OQ-05 | Qual fuso define hoje? Recomenda-se o da cidade, mas ainda exige aprovação. A previsão será diária ou por horários? Quais campos e regras para o dia atual serão exibidos? | Fecha datas, conteúdo e granularidade; resolver antes de aprovar RF-03. |
-| OQ-06 | A unidade será mantida entre visitas por armazenamento local ou apenas durante a visita? Qual precisão e arredondamento serão usados? | Fecha AC-04.4 e persistência de preferência; resolver antes de aprovar RF-04. |
-| OQ-07 | Qual a idade máxima aceitável? Quando atualizar: nova seleção, ação manual, intervalo, retorno à página ou virada do dia? Como tratar referência temporal ausente? | Define validade e atualização sem prometer tempo real; resolver antes de aprovar RF-07. |
-| OQ-08 | Qual o timeout? Haverá tentativas automáticas? Dados anteriores ficam visíveis durante carregamento ou erro? Cache será permitido, por quanto tempo e com qual recuperação parcial? | Fecha comportamento de falhas e dados antigos; resolver antes da implementação de RF-05 a RF-07. |
-| OQ-09 | A meta de até 2 s no percentil 95 será adotada? Para quais operações, dispositivos, redes, janela de amostragem e fronteira de medição? | Torna desempenho verificável e separa dependência externa; resolver antes de aprovar RNF-04. |
-| OQ-10 | Haverá meta de disponibilidade? Qual janela, ponto de medição, tratamento de manutenção e responsabilidade por falhas externas? | Evita assumir 99,9% sem sustentação; resolver antes de firmar compromisso operacional. |
-| OQ-11 | WCAG 2.2 AA será exigida? Quais tecnologias assistivas e cenários integrarão a avaliação? | Fecha o padrão formal de acessibilidade; resolver antes de aprovar a estratégia de validação. |
-| OQ-12 | Haverá telemetria, coleta de buscas ou localização e armazenamento local? Quais finalidade, retenção e informação ao usuário? | Define privacidade e tratamento de dados sem contrariar D-04; resolver antes de introduzir coleta ou armazenamento. |
-| OQ-13 | O uso será educacional, pessoal ou comercial? Quais tráfego esperado, cobertura, licença, atribuição, custo, limites e suporte aplicáveis ao Open-Meteo sem API key? | Valida a viabilidade da fonte escolhida; resolver antes de aprovar sua integração no plano. |
+Pendências de aprovação, não valores livres para a implementação. Produto aprova a baseline; operação valida metas; responsável pela integração documenta viabilidade externa. Registrar responsável, data e evidência na resolução. Lançamento exige todas as linhas aprovadas ou revisão explícita dos requisitos afetados, além da validação de RNF-01 a RNF-11. Este documento não declara esses gates cumpridos.
 
-As decisões D-01 a D-05 não devem ser reabertas por implementação. As respostas às perguntas acima devem atualizar os requisitos, critérios e premissas afetados antes de sua aprovação. É possível avançar na discussão da especificação, mas as pendências impedem tratá-la integralmente como um contrato fechado de implementação.
+| ID | Proposta / validação necessária | Evidência para encerrar |
+| --- | --- | --- |
+| OQ-01 | Mariana como persona primária; Rafael e Alex como secundárias; metas de RNF-02. | Aprovação de produto e avaliação das jornadas. |
+| OQ-02 | Site responsivo, dimensões de RNF-01 e navegadores de RNF-10. | Matriz de suporte aprovada. |
+| OQ-03 | Busca mundial, envio explícito, 2 a 100 caracteres, dez resultados e qualificação de BR-01 a BR-04. | Aprovação de produto e amostras do provedor para localidades e caracteres representativos. |
+| OQ-04 | Conteúdo atual mínimo e sucesso parcial definidos em BR-05 a BR-09. | Aprovação de campos, fallback e estados; contrato validado com a fonte. |
+| OQ-05 | Resumo diário com mínima, máxima e condição; fuso IANA da cidade e janela local. | Aprovação do conteúdo e cenários de fronteira de datas. |
+| OQ-06 | Uma casa decimal, empates afastados de zero, unidade somente em memória e Celsius após recarga. | Aprovação das regras de exibição e preferência. |
+| OQ-07 | Atualização manual, a cada 15 min visíveis e na virada local; validade atual de 3 h e tolerância futura de 5 min. | Aprovação de produto e compatibilidade com frequência e semântica do provedor. |
+| OQ-08 | Timeout de 10 s, sem repetição automática após falha, sem cache de recuperação e bloqueio por limite segundo BR-15. | Aprovação dos estados e impacto no tráfego esperado. |
+| OQ-09 | Meta e método de desempenho de RNF-04. | Aprovação do ambiente de referência e orçamento de desempenho. |
+| OQ-10 | Disponibilidade da aplicação segundo RNF-05, sem prometer SLA do provedor. | Hospedagem, custo, ponto de medição e responsável operacional definidos. |
+| OQ-11 | WCAG 2.2 AA e matriz assistiva de RNF-03. | Critérios aprovados e auditoria antes do lançamento. |
+| OQ-12 | Sem telemetria própria nem persistência local; chamadas externas e registros da hospedagem sujeitos a análise. | Fluxo de dados, finalidade, retenção externa conhecida e informação ao usuário documentados. |
+| OQ-13 | Confirmar uso educacional, pessoal ou comercial, tráfego, cobertura, licença, atribuição, custo, limites e suporte do Open-Meteo sem API key. | Evidência dos termos vigentes e adequação ao uso real. Se inviável, bloquear lançamento e revisar D-01 com stakeholders. |

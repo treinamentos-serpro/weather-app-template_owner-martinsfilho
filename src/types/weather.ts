@@ -20,6 +20,7 @@ export interface ForecastDay {
   minTemperatureC: number | null;
   maxTemperatureC: number | null;
   weatherCode: number | null;
+  precipitationProbabilityPercent: number | null;
 }
 
 export interface WeatherData {

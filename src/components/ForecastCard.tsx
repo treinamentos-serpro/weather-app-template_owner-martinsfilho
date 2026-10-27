@@ -3,9 +3,7 @@ import { formatTemperature } from '../lib/temperature';
 import { getWeatherPresentation } from '../lib/weatherCodes';
 import type { ForecastDay, Unit } from '../types/weather';
 
-export interface ForecastCardData extends ForecastDay {
-  precipitationProbabilityPercent?: number | null;
-}
+export type ForecastCardData = ForecastDay;
 
 interface ForecastCardProps {
   day: ForecastCardData;

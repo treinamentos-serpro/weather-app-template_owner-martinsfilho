@@ -27,7 +27,7 @@ Os RF-01 a RF-04 preservam as capacidades do discovery; RF-05 a RF-08 detalham s
 | --- | --- | --- | --- | --- |
 | RF-01 | Pesquisar cidades, distinguir resultados e selecionar explicitamente uma localização válida. | Discovery RF-01, R-01 | US-01 | AC-01.1 a AC-01.8 |
 | RF-02 | Exibir temperatura, condição e referência do clima atual da cidade selecionada, sem inventar valores ausentes. | Discovery RF-02 | US-02 | AC-02.1 a AC-02.5 |
-| RF-03 | Exibir resumo diário com data, mínima, máxima e condição para hoje e os quatro dias seguintes no fuso da cidade. | Discovery RF-03, D-02 | US-03 | AC-03.1 a AC-03.6 |
+| RF-03 | Exibir resumo diário com data, mínima, máxima, condição e probabilidade máxima de precipitação para hoje e os quatro dias seguintes no fuso da cidade. | Discovery RF-03, D-02 | US-03 | AC-03.1 a AC-03.7 |
 | RF-04 | Iniciar em Celsius e alternar todas as temperaturas entre Celsius e Fahrenheit, sem alterar cidade ou período; manter unidade somente durante a visita. | Discovery RF-04, D-03 | US-04 | AC-04.1 a AC-04.6 |
 | RF-05 | Distinguir início, carregamento, sucesso, sucesso parcial, vazio de busca e erro, conforme a matriz de estados. | Discovery RNF-02, RNF-07 | US-05 | AC-05.1 a AC-05.6 |
 | RF-06 | Tratar falhas, timeout e concorrência, permitindo recuperação sem recarregar a página e sem apresentar resultados obsoletos. | Discovery RNF-07, R-02 | US-06 | AC-06.1 a AC-06.8 |
@@ -43,10 +43,10 @@ Os RF-01 a RF-04 preservam as capacidades do discovery; RF-05 a RF-08 detalham s
 
 ### Regras meteorológicas e temporais
 
-- **BR-05:** clima atual contém temperatura, condição textual e instante de validade da fonte. A previsão contém cinco resumos diários: data local, mínima, máxima e condição. Sensação térmica, vento, umidade, precipitação e detalhe horário não integram esta baseline.
+- **BR-05:** clima atual contém temperatura, condição textual e instante de validade da fonte. A previsão contém cinco resumos diários: data local, mínima, máxima, condição e probabilidade máxima de precipitação em porcentagem. Sensação térmica, vento, umidade, precipitação acumulada e detalhe horário não integram esta baseline.
 - **BR-06:** usar o fuso IANA da cidade retornado pelo provedor para definir hoje e formatar horários. Falta ou invalidade do fuso impede apresentar dados meteorológicos; não adotar silenciosamente o fuso do dispositivo. Cinco dias são datas locais consecutivas, inclusive em viradas de mês, ano e horário de verão, não cinco intervalos fixos de 24 horas.
-- **BR-07:** temperatura válida é um número finito, inclusive zero e negativos; não converter texto numérico por suposição. Data inválida não participa da previsão. Ignorar datas fora da janela e ordenar as demais. Data duplicada tem seus dados considerados indisponíveis, sem escolher arbitrariamente um registro. Se mínima > máxima, invalidar ambas nesse dia.
-- **BR-08:** campo numérico indisponível aparece como “Indisponível”, sem zero substituto nem unidade isolada. Temperatura atual só é utilizável com instante de validade válido, não mais de 3 horas anterior à consulta nem mais de 5 minutos no futuro. Cada dia da previsão é utilizável se tiver ao menos uma temperatura válida. Código meteorológico ausente ou desconhecido recebe “Condição indisponível”, sem ocultar temperaturas válidas.
+- **BR-07:** temperaturas válidas são números finitos, inclusive zero e negativos; probabilidade válida é número finito entre 0 e 100; não converter texto numérico por suposição. Data inválida não participa da previsão. Ignorar datas fora da janela e ordenar as demais. Data duplicada tem seus dados considerados indisponíveis, sem escolher arbitrariamente um registro. Se mínima > máxima, invalidar ambas nesse dia.
+- **BR-08:** campo numérico indisponível aparece como “Indisponível”, sem zero substituto nem unidade isolada, exceto probabilidade máxima de precipitação: valor null ou ausente é normalizado para 0%. Temperatura atual só é utilizável com instante de validade válido, não mais de 3 horas anterior à consulta nem mais de 5 minutos no futuro. Cada dia da previsão é utilizável se tiver ao menos uma temperatura válida. Código meteorológico ausente ou desconhecido recebe “Condição indisponível”, sem ocultar temperaturas válidas.
 - **BR-09:** sucesso completo exige temperatura e condição atuais válidas e cinco dias com mínima, máxima e condição válidas. Havendo ao menos uma temperatura atual ou diária utilizável, apresentar sucesso parcial com “Alguns dados estão indisponíveis” e preservar campos válidos. Sem temperatura utilizável, mostrar erro global. Não misturar dados de cidades ou respostas diferentes para preencher lacunas.
 - **BR-10:** converter a partir dos valores originais, sem arredondar valores intermediários. Exibir uma casa decimal, vírgula decimal e unidade em cada temperatura; arredondar ao décimo mais próximo, com empates afastados de zero. Normalizar zero negativo para 0,0. A escolha de unidade dura somente até recarregar ou fechar a página, sem persistência entre visitas.
 - **BR-11:** identificar “Válido em” para o instante das condições atuais, “Período” para as cinco datas e “Consultado em” para a conclusão da consulta. Exibir datas como dd/MM/aaaa e horas como HH:mm, identificando o fuso IANA associado. Só exibir “Atualizado pelo provedor em” se esse instante existir na fonte; horário de consulta nunca substitui atualização meteorológica.
@@ -91,7 +91,7 @@ Cada intervalo inclui todos os critérios entre os dois IDs, inclusive. Os RNFs 
 | --- | --- | --- | --- | --- |
 | US-01 / Rafael | RF-01 | AC-01.1 a AC-01.8 | RNF-02, RNF-04, RNF-07, RNF-09 | Entrada, geocoding, identidade e seleção; validar limites, homônimos, registros inválidos, tempo de resposta e cobertura da fonte. |
 | US-02 / Mariana | RF-02 | AC-02.1 a AC-02.5 | RNF-02, RNF-04, RNF-06, RNF-07, RNF-09 | Clima atual; validar valores, códigos, referências temporais, fronteiras de validade e sucesso parcial. |
-| US-03 / Rafael | RF-03 | AC-03.1 a AC-03.6 | RNF-02, RNF-04, RNF-06, RNF-07, RNF-09 | Previsão diária; validar campos, cinco datas locais, fusos, transições de calendário e dados conflitantes. |
+| US-03 / Rafael | RF-03 | AC-03.1 a AC-03.7 | RNF-02, RNF-04, RNF-06, RNF-07, RNF-09 | Previsão diária; validar temperaturas, probabilidade, cinco datas locais, fusos, transições de calendário e dados conflitantes. |
 | US-04 / Alex | RF-04 | AC-04.1 a AC-04.6 | RNF-02 | Unidade e formatação; validar conversão, arredondamento, alternâncias, troca durante carregamento e recarga sem persistência. |
 | US-05 / Mariana | RF-05 | AC-05.1 a AC-05.6 | RNF-04, RNF-07 | Estados da interface; validar carregamento, vazio, sucesso completo/parcial e erro global sem valores inventados. |
 | US-06 / Mariana | RF-06 | AC-06.1 a AC-06.8 | RNF-04, RNF-07 | Recuperação e concorrência; validar timeout, respostas fora de ordem, repetição manual, bloqueio por limite e suspensão automática. |
@@ -133,12 +133,13 @@ Cada linha é um cenário automatizável. Usar respostas, relógio, visibilidade
 
 | Critério | Given | When | Then |
 | --- | --- | --- | --- |
-| AC-03.1 | Hoje local é 27/10/2026; cinco dias completos com mínima 10 °C, máxima 20 °C e código 0. | Exibir previsão. | Exatamente 27 a 31/10/2026 em ordem; cada dia mostra 10,0 °C, 20,0 °C e “Céu limpo”, sob identificação de previsão. |
+| AC-03.1 | Hoje local é 27/10/2026; cinco dias completos com mínima 10 °C, máxima 20 °C, código 0 e probabilidades [10, null, 30, 40, 50]. | Exibir previsão. | Exatamente 27 a 31/10/2026 em ordem; cada dia mostra 10,0 °C, 20,0 °C e “Céu limpo”; probabilidades exibidas como 10%, 0%, 30%, 40% e 50%. |
 | AC-03.2 | Instante 28/10/2026 às 01:00 UTC, cidade em America/Sao_Paulo e dispositivo em UTC. | Exibir previsão. | Hoje é 27/10 na cidade; janela de 27 a 31/10, independentemente do dispositivo. |
 | AC-03.3 | A data de referência é 27/10/2026 e a resposta contém dados distintos para 27, 28, 30 e 31/10 e 01/11/2026, mas nenhum dado para 29/10/2026. | A previsão é apresentada. | A janela continua de 27 a 31/10/2026; 29/10 indica indisponibilidade, as outras quatro datas mantêm seus próprios dados e 01/11 não é incluído para preencher a lacuna. |
 | AC-03.4 | Dias fora de ordem, uma data duplicada e um par mínima 25 °C / máxima 15 °C. | Processar resposta. | Ordenar datas; data duplicada indisponível; par invertido indisponível; aviso parcial se houver temperatura utilizável. |
 | AC-03.5 | Hoje local é 31/12/2026; em outro teste é 07/03/2026 em America/New_York, antes da mudança de horário de verão. | Exibir cinco dias. | Primeiro caso: 31/12 a 04/01/2027; segundo: 07 a 11/03, sem pular ou duplicar datas pela mudança de duração do dia. |
 | AC-03.6 | Fuso da cidade ausente ou identificador inválido. | Processar a consulta. | Erro de dados, sem temperaturas meteorológicas exibidas; não usar o fuso do dispositivo como substituto. |
+| AC-03.7 | A resposta diária contém precipitation_probability_max null ou omite o valor em uma das cinco datas; testar ambos os casos. | Normalizar e exibir a previsão. | A data mantém sua posição e apresenta probabilidade 0%; os demais dias preservam seus próprios valores, sem deslocamento dos arrays. |
 
 ### US-04 / RF-04 — Unidades
 
@@ -257,6 +258,7 @@ Os valores abaixo são critérios propostos de aprovação da baseline, não SLA
 | Geocoding vazio ou sem campo de resultados | Nenhuma correspondência; tipo incorreto ou todos os registros inválidos são erro de dados. | AC-01.7, AC-01.8 |
 | Homônimos, região ou país ausentes | Qualificar pelo que existir e usar coordenadas quando necessário. | AC-01.2, AC-01.6 |
 | API indisponível, timeout, limite | Encerrar estado pendente, mensagem específica e recuperação sem ciclo automático. | AC-06.1, AC-06.4, AC-06.6 |
+| Probabilidade de precipitação null/ausente | Normalizar para 0% e manter alinhamento com a data correspondente. | AC-03.7 |
 | Resposta parcial, vazia ou malformada | Preservar partes válidas ou erro global conforme BR-09; nunca completar com zero. | AC-05.5, AC-05.6 |
 | Código desconhecido, temperatura zero ou negativa | Fallback textual para condição; preservar temperaturas válidas. | AC-02.2, AC-02.4 |
 | Datas ausentes, duplicadas, fora de ordem ou temperaturas invertidas | Manter janela, ordenar e marcar lacunas; não escolher dados conflitantes. | AC-03.3, AC-03.4 |
@@ -302,7 +304,7 @@ Os valores abaixo são critérios propostos de aprovação da baseline, não SLA
 
 - Geolocalização automática, favoritos, alertas, notificações, mapas, radar e histórico.
 - Funcionamento offline, instalação como PWA, aplicativos nativos e cache de recuperação.
-- Previsão horária, dias além de hoje + quatro, sensação térmica, vento, umidade e precipitação.
+- Previsão horária, dias além de hoje + quatro, sensação térmica, vento, umidade e precipitação acumulada. A previsão diária inclui probabilidade máxima de precipitação.
 - Persistência local de cidade/unidade e telemetria de uso própria.
 
 As exclusões propostas não substituem a aprovação em OQ-02, OQ-04 a OQ-06, OQ-08 e OQ-12. A arquitetura e os mecanismos internos pertencem ao plano técnico.
@@ -317,7 +319,7 @@ Pendências de aprovação, não valores livres para a implementação. Produto 
 | OQ-02 | Site responsivo, dimensões de RNF-01 e navegadores de RNF-10. | Matriz de suporte aprovada. |
 | OQ-03 | Busca mundial, envio explícito, 2 a 100 caracteres, dez resultados e qualificação de BR-01 a BR-04. | Aprovação de produto e amostras do provedor para localidades e caracteres representativos. |
 | OQ-04 | Conteúdo atual mínimo e sucesso parcial definidos em BR-05 a BR-09. | Aprovação de campos, fallback e estados; contrato validado com a fonte. |
-| OQ-05 | Resumo diário com mínima, máxima e condição; fuso IANA da cidade e janela local. | Aprovação do conteúdo e cenários de fronteira de datas. |
+| OQ-05 | Resumo diário com mínima, máxima, condição e probabilidade máxima de precipitação; fuso IANA da cidade e janela local. | Aprovação do conteúdo e cenários de fronteira de datas. |
 | OQ-06 | Uma casa decimal, empates afastados de zero, unidade somente em memória e Celsius após recarga. | Aprovação das regras de exibição e preferência. |
 | OQ-07 | Atualização manual, a cada 15 min visíveis e na virada local; validade atual de 3 h e tolerância futura de 5 min. | Aprovação de produto e compatibilidade com frequência e semântica do provedor. |
 | OQ-08 | Timeout de 10 s, sem repetição automática após falha, sem cache de recuperação e bloqueio por limite segundo BR-15. | Aprovação dos estados e impacto no tráfego esperado. |

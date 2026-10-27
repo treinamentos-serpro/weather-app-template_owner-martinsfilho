@@ -216,6 +216,7 @@ function mapForecastDay(
   minimum: unknown,
   maximum: unknown,
   weatherCode: unknown,
+  precipitationProbability: unknown,
 ): ForecastDay {
   let minTemperatureC = finiteNumber(minimum);
   let maxTemperatureC = finiteNumber(maximum);
@@ -230,6 +231,10 @@ function mapForecastDay(
     minTemperatureC,
     maxTemperatureC,
     weatherCode: finiteNumber(weatherCode),
+    precipitationProbabilityPercent:
+      precipitationProbability === null || precipitationProbability === undefined
+        ? 0
+        : finiteNumber(precipitationProbability),
   };
 }
 
@@ -241,6 +246,9 @@ function normalizeForecastDays(daily: Record<string, unknown>, now: Date, timeZo
   const minimums = Array.isArray(daily.temperature_2m_min) ? daily.temperature_2m_min : [];
   const maximums = Array.isArray(daily.temperature_2m_max) ? daily.temperature_2m_max : [];
   const weatherCodes = Array.isArray(daily.weather_code) ? daily.weather_code : [];
+  const precipitationProbabilities = Array.isArray(daily.precipitation_probability_max)
+    ? daily.precipitation_probability_max
+    : [];
   const normalizedByDate = new Map<string, ForecastDay>();
   const duplicateDates = new Set<string>();
 
@@ -261,11 +269,19 @@ function normalizeForecastDays(daily: Record<string, unknown>, now: Date, timeZo
 
     normalizedByDate.set(
       sourceDate,
-      mapForecastDay(sourceDate, minimums[index], maximums[index], weatherCodes[index]),
+      mapForecastDay(
+        sourceDate,
+        minimums[index],
+        maximums[index],
+        weatherCodes[index],
+        precipitationProbabilities[index],
+      ),
     );
   });
 
-  return dates.map((date) => normalizedByDate.get(date) ?? mapForecastDay(date, null, null, null));
+  return dates.map(
+    (date) => normalizedByDate.get(date) ?? mapForecastDay(date, null, null, null, null),
+  );
 }
 
 export async function searchCities(name: string): Promise<City[]> {
@@ -318,7 +334,7 @@ export async function getWeather(city: City): Promise<WeatherData> {
     latitude: String(city.latitude),
     longitude: String(city.longitude),
     current: 'temperature_2m,weather_code',
-    daily: 'temperature_2m_min,temperature_2m_max,weather_code',
+    daily: 'temperature_2m_min,temperature_2m_max,weather_code,precipitation_probability_max',
     temperature_unit: 'celsius',
     timezone: 'auto',
     forecast_days: '5',

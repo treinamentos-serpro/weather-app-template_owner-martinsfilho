@@ -42,7 +42,7 @@ Contratos de domínio normalizados; estes nomes substituem as alternativas Tempe
 | Unit | União literal 'celsius' ou 'fahrenheit'; somente apresentação. |
 | City | id:string estável; name:string; region:string ou null; country:string ou null; latitude:number; longitude:number. Nome/coordenadas válidos obrigatórios; fuso do geocoding não é condição de seleção. |
 | CurrentWeather | temperatureC:number ou null; weatherCode:number ou null; validAt:string ISO 8601 UTC ou null. Invalidade do instante invalida a temperatura atual. |
-| ForecastDay | date:string YYYY-MM-DD local validada; minTemperatureC:number ou null; maxTemperatureC:number ou null; weatherCode:number ou null. |
+| ForecastDay | date:string YYYY-MM-DD local validada; minTemperatureC:number ou null; maxTemperatureC:number ou null; weatherCode:number ou null; precipitationProbabilityPercent:number ou null, com null/ausente da fonte normalizado para 0. |
 | WeatherData | city:City; timeZone:string IANA válida; current:CurrentWeather; forecast:readonly ForecastDay[]; consultedAt:string ISO 8601 UTC. Exatamente cinco datas distintas e crescentes, inclusive placeholders. |
 | AppError | kind:network/http/timeout/rateLimit/invalidData; operation:search/weather; httpStatus:number ou null; retryAt:number epoch ms ou null. |
 | SearchResult | results com cidades, empty ou failure com AppError. |
@@ -67,10 +67,10 @@ Contratos de domínio normalizados; estes nomes substituem as alternativas Tempe
 | Endpoint GET | Parâmetros |
 | --- | --- |
 | https://geocoding-api.open-meteo.com/v1/search | name via URLSearchParams; count=10; language=pt; format=json; sem filtro fixo de país nem API key. |
-| https://api.open-meteo.com/v1/forecast | latitude, longitude; current=temperature_2m,weather_code; daily=temperature_2m_min,temperature_2m_max,weather_code; temperature_unit=celsius; timezone=auto; forecast_days=5; timeformat=iso8601. |
+| https://api.open-meteo.com/v1/forecast | latitude, longitude; current=temperature_2m,weather_code; daily=temperature_2m_min,temperature_2m_max,weather_code,precipitation_probability_max; temperature_unit=celsius; timezone=auto; forecast_days=5; timeformat=iso8601. |
 
 - Geocoding: id → City.id como string, admin1 → region, country → country; ausência de id válido usa coordenadas completas como chave. results ausente ou vazio é empty; tipo incorreto ou todos os registros inválidos é invalidData.
-- Forecast: timezone → timeZone; current.temperature_2m/weather_code → current; daily.time/min/max/weather_code → forecast por índice. Arrays curtos geram campos null; não filtrar cada array independentemente. time é campo retornado, não variável solicitada em daily.
+- Forecast: timezone → timeZone; current.temperature_2m/weather_code → current; daily.time/min/max/weather_code/precipitation_probability_max → forecast por índice. Arrays curtos geram campos null; probabilidade null/ausente vira 0; não filtrar arrays independentemente. time é campo retornado, não variável solicitada em daily.
 - Datas diárias ISO são preservadas após validação. Para current.time sem offset, a proposta é converter componentes locais com utc_offset_seconds da mesma resposta, sem Date.parse local implícito. **Gate de contrato:** comprovar essa semântica e consistência com fuso/DST por documentação e amostras antes de implementar o adaptador. Se não comprovada, revisar esta decisão, não improvisar conversão. Offset inválido permite somente previsão parcial utilizável.
 - Confirmar unidades e código WMO, CORS e acesso a Retry-After, inclusive em erro. Cabeçalho inacessível usa fallback de 60 s. Não inserir proxy sem revisão de plano.
 - OQ-13 exige evidência de finalidade, licença, atribuição, tráfego, cobertura, custo, limites e suporte. Exemplos de conversa não substituem o contrato real.
@@ -97,10 +97,10 @@ Contratos de domínio normalizados; estes nomes substituem as alternativas Tempe
 
 | Escopo | Verificação e rastreabilidade |
 | --- | --- |
-| Vitest/lib | Entrada Unicode, coordenadas, calendário IANA/DST, cinco datas, conversão decimal e códigos; AC-01.4 a AC-01.8, AC-02.2, AC-03.2 a AC-03.5, AC-04.4. |
-| Vitest/services | Mock de fetch, parâmetros, unknown, arrays parciais, fuso e referência atual, timeout e Retry-After; RF-01 a RF-03, RF-06 e RF-07. |
+| Vitest/lib | Entrada Unicode, coordenadas, calendário IANA/DST, cinco datas, probabilidade diária, conversão decimal e códigos; AC-01.4 a AC-01.8, AC-02.2, AC-03.2 a AC-03.5, AC-03.7, AC-04.4. |
+| Vitest/services | Mock de fetch, parâmetros, unknown, arrays parciais, fuso, referência atual e null→0 para probabilidade diária, timeout e Retry-After; RF-01 a RF-03, RF-06 e RF-07. |
 | Testing Library/hooks/UI | Estados, callbacks, geração vigente, unidade durante fetch, visibilidade e limpeza; RF-04 a RF-08. Relógio e promessas controlados, sem sleep. |
-| Playwright | Jornada completa, erros, vazio, parcial, concorrência, teclado, recarga e mobile; interceptar ambos os hosts. Cobertura dos 51 AC identificada no backlog. |
+| Playwright | Jornada completa, erros, vazio, parcial, concorrência, teclado, recarga e mobile; interceptar ambos os hosts. Cobertura dos 52 AC identificada no backlog. |
 | Qualidade e operação | Evidências específicas de RNF-01 a RNF-11; mocks não comprovam licença, CORS, WCAG, usabilidade, disponibilidade ou compatibilidade em aparelhos reais. |
 
 - Reutilizar vite.config.ts (tests/setup.ts, jsdom e tests/unit) e playwright.config.ts. Adicionar Firefox/WebKit e manter projeto mobile; fixar versões reais na evidência de release.

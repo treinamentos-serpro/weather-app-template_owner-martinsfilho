@@ -36,7 +36,7 @@ export default function UnitToggle({ unit, onChange }: UnitToggleProps) {
         aria-label="Celsius"
         aria-pressed={unit === 'celsius'}
         onClick={() => onChange('celsius')}
-        className="rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 aria-pressed:bg-accent-500"
+        className="rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 aria-pressed:bg-accent-400 aria-pressed:text-night-900 motion-reduce:transition-none"
       >
         °C
       </button>
@@ -46,7 +46,7 @@ export default function UnitToggle({ unit, onChange }: UnitToggleProps) {
         aria-label="Fahrenheit"
         aria-pressed={unit === 'fahrenheit'}
         onClick={() => onChange('fahrenheit')}
-        className="rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 aria-pressed:bg-accent-500"
+        className="rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 aria-pressed:bg-accent-400 aria-pressed:text-night-900 motion-reduce:transition-none"
       >
         °F
       </button>

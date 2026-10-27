@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { formatTemperature } from '../lib/temperature';
 import { getWeatherPresentation } from '../lib/weatherCodes';
 import type { City, CurrentWeather as CurrentWeatherData, Unit } from '../types/weather';
@@ -28,16 +29,17 @@ function formatMetric(value: number | null | undefined, unit: string): string {
 }
 
 export default function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
+  const headingId = useId();
   const condition = getWeatherPresentation(current.weatherCode);
   const locationDetails = [city.region, city.country].filter(Boolean).join(', ');
 
   return (
     <section
-      aria-labelledby="current-weather-title"
+      aria-labelledby={headingId}
       className="w-full rounded-lg border border-white/10 bg-white/5 p-5 text-white shadow-glass backdrop-blur-md sm:p-6"
     >
       <header className="text-center">
-        <h2 id="current-weather-title" className="text-lg font-semibold">
+        <h2 id={headingId} className="text-lg font-semibold">
           {city.name}
         </h2>
         {locationDetails && <p className="mt-1 text-sm text-white/65">{locationDetails}</p>}

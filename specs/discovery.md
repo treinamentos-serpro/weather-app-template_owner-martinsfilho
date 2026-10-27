@@ -4,6 +4,16 @@
 
 A empresa precisa de uma aplicação de previsão do tempo para que usuários consultem informações meteorológicas de cidades. A experiência deve atender tanto a dispositivos móveis quanto a outros formatos de tela. O briefing identifica busca por cidade, consulta do clima atual, previsão para cinco dias e escolha entre Celsius e Fahrenheit como capacidades centrais.
 
+## Personas
+
+As personas propostas durante o discovery são hipóteses a validar, não uma definição aprovada do público. As métricas abaixo são candidatas; a prioridade entre personas permanece em aberto.
+
+| Persona | Objetivo principal | Contexto de uso | Métrica de sucesso do ponto de vista da persona |
+| --- | --- | --- | --- |
+| Mariana, rotina urbana | Consultar o clima atual para decidir o que vestir antes de sair. | Mobile, pela manhã, com pouco tempo e conexão variável. | Encontrar sua cidade e entender as condições atuais em até 30 segundos, sem ajuda. |
+| Rafael, viajante de curta duração | Consultar a previsão dos próximos cinco dias para preparar a mala e organizar passeios. | Desktop no planejamento e mobile próximo da viagem. | Identificar a cidade correta, inclusive entre homônimas, e consultar hoje e os quatro dias seguintes em até 1 minuto. |
+| Alex, usuário habituado a Fahrenheit | Entender temperaturas na unidade que usa no cotidiano. | Mobile e desktop, consultando cidades de diferentes países. | Mudar para °F em uma ação, com todas as temperaturas atualizadas e a unidade claramente indicada. |
+
 ## Requisitos Funcionais
 
 - **RF-01 — Buscar cidades:** permitir que o usuário pesquise uma cidade e selecione o local desejado para consultar o clima.

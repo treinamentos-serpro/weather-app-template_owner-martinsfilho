@@ -36,16 +36,16 @@ Os RF-01 a RF-04 preservam os requisitos do discovery. Os RF-05 a RF-08 detalham
 
 ## User Stories
 
-- **US-01:** Como pessoa que consulta o tempo, quero buscar e identificar a cidade correta para não tomar decisões com dados de outra localização.
-- **US-02:** Como pessoa que vai sair, quero consultar a temperatura e a condição atual da cidade selecionada para me preparar.
-- **US-03:** Como pessoa que planeja atividades, quero consultar hoje e os quatro dias seguintes para organizar meus compromissos.
-- **US-04:** Como pessoa habituada a uma unidade de temperatura, quero alternar entre Celsius e Fahrenheit para interpretar os valores com facilidade.
-- **US-05:** Como pessoa que aguarda uma consulta, quero distinguir carregamento de ausência de resultados para entender o estado da aplicação.
-- **US-06:** Como pessoa afetada por uma falha, quero entender o problema e tentar novamente para continuar minha consulta sem confundir cidades ou dados.
-- **US-07:** Como pessoa que usa informações meteorológicas, quero identificar o horário de referência e eventual uso de cache para avaliar a atualidade dos dados.
-- **US-08:** Como pessoa que usa a interface em português brasileiro, quero consultar o tempo sem criar uma conta para acessar as informações diretamente.
+- **US-01:** Como Rafael, viajante de curta duração, quero buscar meu destino e distinguir cidades homônimas para planejar a viagem com os dados da localização correta. **Requisito: RF-01.**
+- **US-02:** Como Mariana, usuária com rotina urbana, quero consultar a temperatura e a condição atual da minha cidade pelo celular para decidir o que vestir antes de sair. **Requisito: RF-02.**
+- **US-03:** Como Rafael, viajante de curta duração, quero consultar a previsão de hoje e dos quatro dias seguintes para preparar a mala e organizar meus passeios. **Requisito: RF-03.**
+- **US-04:** Como Alex, usuário habituado a Fahrenheit, quero alternar as temperaturas exibidas de Celsius para Fahrenheit para interpretar o clima na unidade que uso no cotidiano. **Requisito: RF-04.**
+- **US-05:** Como Mariana, usuária com rotina urbana, quero distinguir uma consulta em carregamento de uma busca sem resultados para saber se devo aguardar ou corrigir a busca antes de sair. **Requisito: RF-05.**
+- **US-06:** Como Mariana, usuária com rotina urbana, quero entender uma falha de conexão e tentar a consulta novamente para obter o clima da minha cidade mesmo após uma interrupção da rede. **Requisito: RF-06.**
+- **US-07:** Como Rafael, viajante de curta duração, quero identificar o horário de referência dos dados e seu eventual uso de cache para avaliar se estão atualizados antes de organizar meus passeios. **Requisito: RF-07.**
+- **US-08:** Como Mariana, usuária com rotina urbana, quero consultar o tempo em português brasileiro sem criar uma conta para acessar as informações diretamente durante minha rotina da manhã. **Requisito: RF-08.**
 
-As histórias descrevem papéis de uso, não personas já aprovadas.
+As histórias usam as personas registradas no [discovery](discovery.md#personas), ainda como hipóteses a validar. Cada história mantém seu vínculo com os critérios de aceite existentes; a persona prioritária permanece pendente em OQ-01.
 
 ## Acceptance Criteria
 
@@ -144,7 +144,7 @@ A lista de campos e a granularidade da previsão terão critérios adicionais ap
 - **AS-02:** A consulta meteorológica depende da seleção de uma cidade específica; não há cidade inicial automática confirmada.
 - **AS-03:** A alternância Celsius/Fahrenheit altera somente temperaturas, não localização, período, vento ou precipitação. A apresentação de outras grandezas depende dos campos aprovados.
 - **AS-04:** Temperatura e descrição da condição constituem a proposta mínima para clima atual. A lista definitiva, inclusive campos adicionais e obrigatoriedade, depende de OQ-04.
-- **AS-05:** Os papéis das histórias representam necessidades candidatas; não substituem validação de público nem aprovam as personas discutidas fora do discovery.
+- **AS-05:** As histórias usam Mariana, Rafael e Alex, personas candidatas registradas no discovery; não substituem validação de público nem aprovam sua priorização.
 - **AS-06:** Disponibilidade e completude do provedor são dependências, não garantias. A fonte pode fornecer estimativas meteorológicas; a aplicação não promete observação em tempo real nem exatidão absoluta.
 - **AS-07:** As metas numéricas, o padrão formal de acessibilidade e as regras explicitamente pendentes só se tornam compromissos após aprovação registrada.
 - **AS-08:** Sem persistência de servidor não implica ausência de backend, cache local ou registros do provedor. Essas escolhas não estão autorizadas por inferência e devem respeitar OQ-06 e OQ-12.

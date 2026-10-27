@@ -83,6 +83,25 @@ Os RF-01 a RF-04 preservam as capacidades do discovery; RF-05 a RF-08 detalham s
 
 As histórias usam as personas registradas no [discovery](discovery.md#personas), ainda como hipóteses a validar. Cada história mantém seu vínculo com os critérios de aceite existentes; a persona prioritária permanece pendente em OQ-01.
 
+### Matriz de rastreabilidade
+
+Cada intervalo inclui todos os critérios entre os dois IDs, inclusive. Os RNFs específicos da linha devem ser somados aos transversais abaixo; a associação indica obrigação de validação, não comprovação de atendimento.
+
+| User Story / persona | Requisito funcional | Acceptance Criteria | RNFs específicos | Foco da tarefa e da validação |
+| --- | --- | --- | --- | --- |
+| US-01 / Rafael | RF-01 | AC-01.1 a AC-01.8 | RNF-02, RNF-04, RNF-07, RNF-09 | Entrada, geocoding, identidade e seleção; validar limites, homônimos, registros inválidos, tempo de resposta e cobertura da fonte. |
+| US-02 / Mariana | RF-02 | AC-02.1 a AC-02.5 | RNF-02, RNF-04, RNF-06, RNF-07, RNF-09 | Clima atual; validar valores, códigos, referências temporais, fronteiras de validade e sucesso parcial. |
+| US-03 / Rafael | RF-03 | AC-03.1 a AC-03.6 | RNF-02, RNF-04, RNF-06, RNF-07, RNF-09 | Previsão diária; validar campos, cinco datas locais, fusos, transições de calendário e dados conflitantes. |
+| US-04 / Alex | RF-04 | AC-04.1 a AC-04.6 | RNF-02 | Unidade e formatação; validar conversão, arredondamento, alternâncias, troca durante carregamento e recarga sem persistência. |
+| US-05 / Mariana | RF-05 | AC-05.1 a AC-05.6 | RNF-04, RNF-07 | Estados da interface; validar carregamento, vazio, sucesso completo/parcial e erro global sem valores inventados. |
+| US-06 / Mariana | RF-06 | AC-06.1 a AC-06.8 | RNF-04, RNF-07 | Recuperação e concorrência; validar timeout, respostas fora de ordem, repetição manual, bloqueio por limite e suspensão automática. |
+| US-07 / Rafael | RF-07 | AC-07.1 a AC-07.6 | RNF-04, RNF-06, RNF-07, RNF-09 | Referência temporal e atualização; validar rótulos, ausência de cache de recuperação, relógio, visibilidade e mudança da data local. |
+| US-08 / Mariana | RF-08 | AC-08.1 a AC-08.6 | RNF-09 | Acesso, idioma e atribuição; validar jornada sem conta, catálogo pt-BR, teclado, anúncios e link da fonte. |
+
+- **Transversais a todas as histórias:** RNF-01 (responsividade), RNF-03 (acessibilidade), RNF-08 (privacidade e ausência de persistência), RNF-10 (compatibilidade) e RNF-11 (segurança). AC-08.4 e AC-08.5 verificam uma jornada compartilhada de acessibilidade, sem dispensar a avaliação dos demais controles e estados.
+- **Operacional transversal:** RNF-05 cobre a disponibilidade da página e da jornada sintética de ponta a ponta. Exige tarefa de operação e relatório próprio; não é comprovado pelos critérios funcionais isolados.
+- **Uso no backlog e nos testes:** referenciar US, RF, AC e RNF em cada tarefa e evidência. Testes dos AC usam dados controlados; desempenho, auditorias manuais, compatibilidade, privacidade, segurança e condições do provedor exigem as evidências adicionais descritas em Non-Functional Requirements. Esta matriz não altera as aprovações pendentes em Open Questions.
+
 ## Acceptance Criteria
 
 Cada linha é um cenário automatizável. Usar respostas, relógio, visibilidade da página e ordem de conclusão controlados; não depender da API real. Todos os resultados da linha são obrigatórios. Executar separadamente cada variante enumerada. Salvo indicação contrária, as respostas têm cidade, fuso e referência temporal válidos e Celsius está ativo. Os valores esperados seguem BR-01 a BR-16 e o catálogo desta seção. Os IDs anteriores foram mantidos; AC-07.3 agora verifica a política explícita de não reutilizar cache. Os critérios verificam a baseline proposta, cuja aprovação ainda é necessária.
